@@ -9,3 +9,11 @@ export const uniqueSlugGenerator = (value: string, condition?: boolean | Promise
   }
   return newSlug;
 };
+export const randomString = (value: string, length: number): string => {
+  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    value += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return value;
+};

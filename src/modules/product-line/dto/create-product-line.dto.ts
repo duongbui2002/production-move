@@ -2,9 +2,9 @@ import {IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
 import {Prop} from "@nestjs/mongoose";
 
 export class CreateProductLineDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  price: number
+  price: string
 
   @IsString()
   @IsNotEmpty()

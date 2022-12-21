@@ -68,6 +68,7 @@ export class OrderController {
         to: customer.name
       })
       ele.currentlyBelong = customer._id
+      ele.belongToWarehouse = null
       ele.currentlyBelongModel = 'Customer'
 
       await ele.save()

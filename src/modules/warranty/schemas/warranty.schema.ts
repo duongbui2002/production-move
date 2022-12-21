@@ -25,7 +25,7 @@ export class Warranty {
   products: ProductDocument[]
 
   @Prop({
-    enum: ['progress', 'finish', 'broken'],
+    enum: ['progress', 'finish', 'failure'],
     default: 'progress'
   })
   status: string

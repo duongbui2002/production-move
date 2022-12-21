@@ -11,6 +11,8 @@ import {AccountDocument} from "@modules/account/schemas/account.schema";
 import {WarrantyService} from "@modules/warranty/warranty.service";
 import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
 import {ProductService} from "@modules/product/product.service";
+import {Model} from "@common/enums/common.enum";
+import * as moment from "moment/moment";
 
 @Controller('warranty-center')
 export class WarrantyCenterController {
@@ -60,18 +62,50 @@ export class WarrantyCenterController {
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.WarrantyCenter))
   @Post('handle-warranty')
-  async handleWarranty(@Body() handleWarrantyDto: HandleWarrantyDto) {
+  async handleWarranty(@Body() handleWarrantyDto: HandleWarrantyDto, @AccountDecorator() account: AccountDocument) {
     const warranty = await this.warrantyService.findOne({
       _id: handleWarrantyDto.warranty
-    })
-
+    }, {populate: {path: 'fromDistributionAgent'}})
+    const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
     const {data, paginationOptions} = await this.productService.findAll({_id: {$in: warranty.products}})
 
-    if (status === 'success') {
+    if (handleWarrantyDto.status === 'success') {
+      for (const ele of data) {
+        ele.status = 'fixed'
+        ele.currentlyBelong = warranty.fromDistributionAgent._id
+        ele.currentlyBelongModel = Model.DISTRIBUTION_AGENT
+        ele.history = [...ele.history, {
+          type: 'warranted',
+          from: warrantyCenter.name,
+          to: warranty.fromDistributionAgent.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
 
-    } else if (status === 'failure'
-    ) {
+      warranty.status = 'finish'
+      await warranty.save()
+    } else if (handleWarrantyDto.status === 'failure') {
+      for (const ele of data) {
+        ele.status = 'failure'
+        ele.currentlyBelong = ele.producedBy._id
+        ele.currentlyBelongModel = Model.FACTORY
+        ele.history = [...ele.history, {
+          type: 'failure',
+          from: warrantyCenter.name,
+          to: ele.producedBy.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
+      warranty.status = 'failure'
+      await warranty.save()
+    }
 
+    return {
+      success: true,
+      message: "Ok"
     }
   }
+
 }

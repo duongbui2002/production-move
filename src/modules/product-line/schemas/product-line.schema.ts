@@ -65,6 +65,11 @@ export class ProductLine {
     min: 0
   })
   price: number
+
+  @Prop({
+    default: ['https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_75,s_300x300/https://cdn.tgdd.vn/Products/Images/44/282885/s16/apple-pro-m2-2022-10-core-gpu-xam-650x650.png']
+  })
+  images: string[]
 }
 
 export const ProductLineSchema = SchemaFactory.createForClass(ProductLine)

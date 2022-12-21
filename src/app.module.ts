@@ -20,18 +20,20 @@ import {DistributionAgentModule} from "@modules/distribution-agent/distribution-
 import {CustomerModule} from "@modules/customer/customer.module";
 import {DistributionManagementModule} from './modules/distribution-management/distribution-management.module';
 import mongoose from "mongoose";
+import {GoogleStorageModule} from "@modules/google-storage/google-storage.module";
+import googleStorageConfig from "@common/configs/google-storage.config";
 
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-    load: [config]
+    load: [config,googleStorageConfig]
   }), MongooseModule.forRootAsync({
     inject: [ConfigService],
     useFactory: async (configService: ConfigService) => ({
       uri: configService.get<string>("mongodb.uri")
     })
-  }), DatabaseModule, AccountsModule, WarehouseModule, AuthModule, TokensModule, ExecutiveBoardModule, ProductModule, ProductLineModule, WarrantyCenterModule, WarrantyModule, FactoryModule, DistributionAgentModule, OrderModule, CustomerModule, DistributionManagementModule],
+  }), DatabaseModule, GoogleStorageModule, AccountsModule, WarehouseModule, AuthModule, TokensModule, ExecutiveBoardModule, ProductModule, ProductLineModule, WarrantyCenterModule, WarrantyModule, FactoryModule, DistributionAgentModule, OrderModule, CustomerModule, DistributionManagementModule],
   controllers: [AppController],
   providers: [AppService],
 })

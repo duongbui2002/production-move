@@ -4,8 +4,11 @@ import {ProductLine} from "@modules/product-line/schemas/product-line.schema";
 import * as paginate from 'mongoose-paginate-v2'
 import {Document} from "mongoose";
 import {autoPopulate} from "@src/utils/populate-query";
-import {Factory} from "@modules/factory/schemas/factory.schema";
-import {DistributionAgent} from "@modules/distribution-agent/schemas/distribution-agent.schema";
+import {Factory, FactoryDocument} from "@modules/factory/schemas/factory.schema";
+import {
+  DistributionAgent,
+  DistributionAgentDocument
+} from "@modules/distribution-agent/schemas/distribution-agent.schema";
 import {Warehouse} from "@modules/warehouse/schemas/warehouse.schema";
 import {ProductHistorySchema} from "@modules/product/schemas/productHistory.schema";
 import {Order} from "@modules/order/schemas/order.schema";
@@ -28,7 +31,7 @@ export class Product {
     required: true,
     ref: 'Factory'
   })
-  producedBy: Factory
+  producedBy: FactoryDocument
 
 
   @Prop({
@@ -36,7 +39,7 @@ export class Product {
     default: null,
     ref: "DistributionAgent"
   })
-  distributedBy: DistributionAgent
+  distributedBy: DistributionAgentDocument
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -84,7 +87,6 @@ export class Product {
   @Prop({
     enum: ['Factory', 'Warehouse', 'DistributionAgent', 'Customer', 'WarrantyCenter'],
     default: null,
-
   })
   currentlyBelongModel: string
 
