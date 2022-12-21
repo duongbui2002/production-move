@@ -25,7 +25,7 @@ export class Warranty {
   products: ProductDocument[]
 
   @Prop({
-    enum: ['progress', 'finish', 'failure'],
+    enum: ['progress', 'finished', 'failure'],
     default: 'progress'
   })
   status: string
@@ -39,7 +39,7 @@ export class Warranty {
 
   @Prop({
     required: true,
-    type: [{type: mongoose.Schema.Types.ObjectId}],
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer'
   })
   customer: CustomerDocument

@@ -1,4 +1,4 @@
-import {Body, Controller, HttpCode, HttpException, HttpStatus, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, HttpCode, HttpException, HttpStatus, Param, Post, UseGuards} from '@nestjs/common';
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {CreateDistributionAgentDto} from "@modules/distribution-agent/dto/create-distribution-agent.dto";
 import {AuthGuard} from "@common/guards/auth.guard";
@@ -17,6 +17,7 @@ import {WarrantyService} from "@modules/warranty/warranty.service";
 import {CustomerService} from "@modules/customer/customer.service";
 import {WarrantyCenterService} from "@modules/warranty-center/warranty-center.service";
 import {Model, ProductStatus} from "@common/enums/common.enum";
+import e from "express";
 
 @Controller('distribution-agent')
 export class DistributionAgentController {
@@ -25,7 +26,7 @@ export class DistributionAgentController {
               private readonly distributionManagementService: DistributionManagementService,
               private readonly productService: ProductService,
               private readonly warrantyService: WarrantyService,
-              private readonly customer: CustomerService,
+              private readonly customerService: CustomerService,
               private readonly warrantyCenterService: WarrantyCenterService) {
   }
 
@@ -88,8 +89,6 @@ export class DistributionAgentController {
       })
 
       for (const ele of data) {
-
-
         ele.history.push({
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
           type: 'import',
@@ -161,7 +160,7 @@ export class DistributionAgentController {
     }
 
     const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
-    const customer = await this.customer.findOne({_id: createWarrantyDto.customer})
+    const customer = await this.customerService.findOne({_id: createWarrantyDto.customer})
     const warrantyCenter = await this.warrantyCenterService.findOne({_id: createWarrantyDto.warrantyCenter})
 
 
@@ -174,7 +173,6 @@ export class DistributionAgentController {
     })
 
     for (const ele of data) {
-
       ele.status = ProductStatus.WARRANTING
       ele.currentlyBelong = warrantyCenter._id
       ele.currentlyBelongModel = Model.WARRANTY_CENTER
@@ -186,10 +184,77 @@ export class DistributionAgentController {
       }]
       await ele.save()
     }
-
     return {
       success: true,
       data: newData
+    }
+  }
+
+  @Post('warranty-return/:warrantyID')
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.DistributionAgent))
+  async returnProduct(@AccountDecorator() account: AccountDocument, @Param('warrantyID') warrantyId: string) {
+    const warranty = await this.warrantyService.findOne({_id: warrantyId}, {})
+    const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
+    const {
+      data,
+      paginationOptions
+    } = await this.productService.findAll({_id: {$in: warranty.products}}, {populate: [{path: 'producedBy'}]})
+    const customer = await this.customerService.findOne({_id: warranty.customer._id})
+
+    if (warranty.status === 'finished') {
+      for (const ele of data) {
+        ele.status = 'sold'
+        ele.currentlyBelong = customer._id
+        ele.currentlyBelongModel = Model.CUSTOMER
+        ele.history = [...ele.history, {
+          type: 'warranty return',
+          from: distributionAgent.name,
+          to: customer.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
+    } else if (warranty.status === 'failure') {
+      for (const ele of data) {
+        ele.status = 'failure'
+        ele.currentlyBelong = ele.producedBy._id
+        ele.currentlyBelongModel = Model.FACTORY
+        ele.history = [...ele.history, {
+          type: 'return to factory',
+          from: distributionAgent.name,
+          to: ele.producedBy.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
+
+      const results = await this.productService.findAll({
+        status: 'distributed',
+        _id: {$in: warranty.products},
+        distributedBy: account.belongTo,
+      })
+
+
+      if (results.paginationOptions.totalDocs < warranty.products.length) {
+        throw new HttpException(`Not enough products to pay customers`, HttpStatus.BAD_REQUEST)
+      }
+      for (const ele of results.data) {
+        ele.status = 'sold'
+        ele.currentlyBelong = customer._id
+        ele.currentlyBelongModel = Model.CUSTOMER
+        ele.history = [...ele.history, {
+          type: 'sold',
+          from: distributionAgent.name,
+          to: customer.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
+    }
+    return {
+      success: true,
+      message: "Success"
     }
   }
 

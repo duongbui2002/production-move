@@ -52,6 +52,10 @@ export class Account {
   })
   belongTo: string
 
+  @Prop({
+    required: true
+  })
+  belongToModel: string
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

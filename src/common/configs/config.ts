@@ -16,6 +16,12 @@ export default () => ({
       projectId: process.env.GCLOUD_PROJECT_ID || "projectId",
       clientEmail: process.env.GCLOUD_CLIENT_EMAIL || "clientEmail",
       privateKey: process.env.GCLOUD_PRIVATE_KEY && process.env.GCLOUD_PRIVATE_KEY.replace(/(\|\|)/g, '\n'),
+    },
+    gmail: {
+      clientId: process.env.GMAIL_CLIENT_ID,
+      clientSecret: process.env.GMAIL_CLIENT_SECRET,
+      refreshTokenEmail: process.env.GMAIL_REFRESH_TOKEN,
+      adminEmail: process.env.ADMIN_EMAIL
     }
   },
 })

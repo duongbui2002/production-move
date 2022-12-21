@@ -1,5 +1,6 @@
 import {IsEmail, IsNotEmpty, IsString, MaxLength, MinLength} from "class-validator";
 import {Match} from "@common/decorators/validate.decorator";
+import {Prop} from "@nestjs/mongoose";
 
 export class RegisterAccountDto {
   @IsNotEmpty()
@@ -22,6 +23,10 @@ export class RegisterAccountDto {
   @IsString()
   belongTo: string;
 
+
+  @IsNotEmpty()
+  @IsString()
+  belongToModel: string
 
 
   @IsString()

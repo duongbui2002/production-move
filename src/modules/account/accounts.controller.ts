@@ -1,9 +1,11 @@
-import {Body, Controller, Param, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, UseGuards} from '@nestjs/common';
 import {AccountsService} from "@modules/account/accounts.service";
 import {SetRolesDto} from "@modules/account/dto/set-role.dto";
 import {AuthGuard} from "@common/guards/auth.guard";
 import RoleGuard from "@common/guards/roles.guard";
 import Role from "@common/enums/role.enum";
+import {AccountDecorator} from "@common/decorators/account.decorator";
+import {AccountDocument} from "@modules/account/schemas/account.schema";
 
 @Controller('account')
 export class AccountsController {
@@ -24,4 +26,13 @@ export class AccountsController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Get('info')
+  async getInfo(@AccountDecorator() account: AccountDocument) {
+    return {
+      success: true,
+      data: account
+    }
+
+  }
 }

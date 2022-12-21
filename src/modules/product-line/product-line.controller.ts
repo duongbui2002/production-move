@@ -1,11 +1,11 @@
 import {
   Body,
   Controller,
-  Delete, FileTypeValidator,
+  Delete,
   Get,
   HttpCode,
-  HttpStatus, MaxFileSizeValidator,
-  Param, ParseFilePipe,
+  HttpStatus,
+  Param,
   Patch,
   Post,
   Query, UploadedFile, UploadedFiles,
@@ -53,8 +53,6 @@ export class ProductLineController {
       success: true,
       data: newProductLine
     }
-
-
   }
 
   @Get()

@@ -13,10 +13,11 @@ import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
 import {ProductService} from "@modules/product/product.service";
 import {Model} from "@common/enums/common.enum";
 import * as moment from "moment/moment";
+import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 
 @Controller('warranty-center')
 export class WarrantyCenterController {
-  constructor(private readonly warrantyCenterService: WarrantyCenterService, private readonly warrantyService: WarrantyService, private readonly productService: ProductService) {
+  constructor(private readonly warrantyCenterService: WarrantyCenterService, private readonly distributionAgentService: DistributionAgentService, private readonly warrantyService: WarrantyService, private readonly productService: ProductService) {
   }
 
   @UseGuards(AuthGuard)
@@ -36,8 +37,6 @@ export class WarrantyCenterController {
   @UseGuards(RoleGuard(Role.WarrantyCenter))
   @Get('warranty-requests')
   async getAllWarranties(@AccountDecorator() account: AccountDocument, @Query() options: PaginationParamsDto) {
-
-
     const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
     const {data, paginationOptions} = await this.warrantyService.findAll({warrantyCenter}, {
       populate: [{
@@ -58,7 +57,6 @@ export class WarrantyCenterController {
     }
   }
 
-
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.WarrantyCenter))
   @Post('handle-warranty')
@@ -66,6 +64,7 @@ export class WarrantyCenterController {
     const warranty = await this.warrantyService.findOne({
       _id: handleWarrantyDto.warranty
     }, {populate: {path: 'fromDistributionAgent'}})
+    const distributionAgent = await this.distributionAgentService.findOne({_id: warranty.fromDistributionAgent})
     const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
     const {data, paginationOptions} = await this.productService.findAll({_id: {$in: warranty.products}})
 
@@ -77,23 +76,22 @@ export class WarrantyCenterController {
         ele.history = [...ele.history, {
           type: 'warranted',
           from: warrantyCenter.name,
-          to: warranty.fromDistributionAgent.name,
+          to: distributionAgent.name,
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
         }]
         await ele.save()
       }
-
-      warranty.status = 'finish'
+      warranty.status = 'finished'
       await warranty.save()
     } else if (handleWarrantyDto.status === 'failure') {
       for (const ele of data) {
         ele.status = 'failure'
-        ele.currentlyBelong = ele.producedBy._id
-        ele.currentlyBelongModel = Model.FACTORY
+        ele.currentlyBelong = warranty.fromDistributionAgent._id
+        ele.currentlyBelongModel = Model.DISTRIBUTION_AGENT
         ele.history = [...ele.history, {
           type: 'failure',
           from: warrantyCenter.name,
-          to: ele.producedBy.name,
+          to: warranty.fromDistributionAgent.name,
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
         }]
         await ele.save()
