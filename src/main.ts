@@ -2,6 +2,7 @@ import {NestFactory} from '@nestjs/core';
 
 import {ValidationPipe} from "@nestjs/common";
 import {AppModule} from "@src/app.module";
+import * as process from "process";
 
 require("module-alias/register");
 
@@ -21,7 +22,7 @@ async function bootstrap() {
     credentials: true
   })
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 
 bootstrap();
