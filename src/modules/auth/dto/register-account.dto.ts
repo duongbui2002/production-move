@@ -22,9 +22,12 @@ export class RegisterAccountDto {
   @IsString()
   belongTo: string;
 
+
+
   @IsString()
   @IsNotEmpty()
   displayName: string;
+
 
   @IsNotEmpty()
   @IsString()

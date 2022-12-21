@@ -8,7 +8,7 @@ import {DatabaseModule} from "@common/database/database.module";
 @Module({
   controllers: [AuthController],
   providers: [AuthService],
-
+  exports: [AuthService]
 })
 export class AuthModule {
 }

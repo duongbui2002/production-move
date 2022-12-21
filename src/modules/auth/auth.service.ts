@@ -53,7 +53,7 @@ export class AuthService {
   async verifyTokenFromRequest(token: string, keyName: "jwt.accessTokenPrivateKey" | "jwt.refreshTokenPrivateKey"): Promise<AccountDocument> {
     const payload = this.verifyToken(token, "jwt.accessTokenPrivateKey");
     const {accountId} = payload;
-    const account = await this.accountService.findOne({_id: accountId});
+    const account = await this.accountService.findOne({_id: accountId}, {});
 
     if (!account) {
       throw new HttpException("Account does not exist", HttpStatus.UNAUTHORIZED);

@@ -20,6 +20,12 @@ export class Account {
   email: string;
 
   @Prop({
+    enum: ['executive-board', 'distribution-agent', 'factory', 'warranty-center'],
+    type: [{type: mongoose.Schema.Types.String}]
+  })
+  roles: string[]
+
+  @Prop({
     required: true,
     trim: true,
     unique: true
@@ -42,8 +48,10 @@ export class Account {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
+    refPath: 'belongToModel'
   })
   belongTo: string
+
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);

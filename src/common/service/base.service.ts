@@ -10,6 +10,7 @@ import {
 
 } from "mongoose";
 import {HttpException} from "@nestjs/common";
+import mongoose from "mongoose";
 
 export class BaseService<T extends Document> {
   constructor(private model: PaginateModel<T>) {
@@ -17,7 +18,7 @@ export class BaseService<T extends Document> {
 
   async create(createDocumentDto: any, options?: PaginateOptions): Promise<T> {
     const document = await this.model.create(createDocumentDto);
-    if (options.populate) await document.populate(options.populate);
+    if (options?.populate) await document.populate(options.populate);
     return document;
   }
 
@@ -33,21 +34,35 @@ export class BaseService<T extends Document> {
 
   async findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<UnpackedIntersection<HydratedDocument<T, {}, {}>, {}>> {
     const document = await this.model.findOne(filter, null, options).populate(options?.populate).select(options?.select);
-    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 500);
+    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 404);
 
     return document;
   }
 
   async update(filter: FilterQuery<T>, updateDocumentDto: any, options?: QueryOptions): Promise<UnpackedIntersection<HydratedDocument<T, {}, {}>, {}>> {
     const document = await this.model.findOneAndUpdate(filter, updateDocumentDto, options).populate(options?.populate);
-    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 500);
-
+    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 404);
     return document;
+  }
+
+
+  async updateMany(filter: FilterQuery<T>, updateDocumentDto: any, options?: QueryOptions): Promise<any> {
+    const document = await this.model.updateMany(filter, updateDocumentDto, options).populate(options?.populate);
+    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 404);
+    return document;
+  }
+
+  async aggregate(pipeline: mongoose.PipelineStage[], options?: mongoose.AggregateOptions) {
+
+    const data = await this.model.aggregate(pipeline, options);
+    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 404);
+
+    return data
   }
 
   async remove(filter: FilterQuery<T>, options?: QueryOptions): Promise<UnpackedIntersection<HydratedDocument<T, {}, {}>, {}>> {
     const document = await this.model.findOneAndDelete(filter, options).populate(options?.populate);
-    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 500);
+    if (options?.nullable !== true && !document) throw new HttpException(`${this.model.modelName} not found`, 404);
 
     return document;
   }

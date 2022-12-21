@@ -17,6 +17,8 @@ import {AccountsService} from "@modules/account/accounts.service";
 import {TokensService} from "@modules/tokens/tokens.service";
 import {LoginDto} from "@modules/auth/dto/login.dto";
 import {AuthGuard} from "@common/guards/auth.guard";
+import RoleGuard from "@common/guards/roles.guard";
+import Role from "@common/enums/role.enum";
 
 
 @Controller('auth')
@@ -24,6 +26,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly accountsService: AccountsService, private tokenService: TokensService) {
   }
 
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.ExecutiveBoard))
   @Post("register")
   async register(@Body() registerAccountDto: RegisterAccountDto) {
     await this.accountsService.create(registerAccountDto)

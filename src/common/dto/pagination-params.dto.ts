@@ -17,4 +17,6 @@ export class PaginationParamsDto {
   @IsNumber()
   @Min(1)
   limit?: number;
+  
+
 }

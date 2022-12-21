@@ -5,7 +5,10 @@ declare module "mongoose" {
     nullable?: boolean;
   }
 }
+
 interface PaginatedDocumentsResponse<T> {
   data: T[];
   paginationOptions: Partial<import ("mongoose").PaginateResult<T>>;
 }
+
+//'new', 'sold', 'distributed', 'fixed', 'failure', 'warranting'

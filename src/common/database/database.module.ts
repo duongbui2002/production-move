@@ -5,6 +5,14 @@ import {WarehouseSchema} from "@modules/warehouse/schemas/warehouse.schema";
 import {TokenSchema} from "@modules/tokens/schema/token.schema";
 import {ExecutiveBoardSchema} from "@modules/executive-board/schemas/executive-board.schema";
 import {ProductLineSchema} from "@modules/product-line/schemas/product-line.schema";
+import {ProductSchema} from "@modules/product/schemas/product.schema";
+import {DistributionAgentSchema} from "@modules/distribution-agent/schemas/distribution-agent.schema";
+import {FactorySchema} from "@modules/factory/schemas/factory.schema";
+import {DistributionManagementSchema} from "@modules/distribution-management/schemas/distribution-management.schema";
+import {WarrantySchema} from "@modules/warranty/schemas/warranty.schema";
+import {WarrantyCenter, WarrantyCenterSchema} from "@modules/warranty-center/schemas/warranty-center.schema";
+import {OrderSchema} from "@modules/order/schemas/order.schema";
+import {CustomerSchema} from "@modules/customer/schemas/customer.schema";
 
 @Global()
 @Module({
@@ -13,6 +21,18 @@ import {ProductLineSchema} from "@modules/product-line/schemas/product-line.sche
       {
         name: 'Account',
         schema: AccountSchema
+      },
+      {
+        name: 'Order',
+        schema: OrderSchema
+      },
+      {
+        name: 'Warranty',
+        schema: WarrantySchema
+      },
+      {
+        name: 'WarrantyCenter',
+        schema: WarrantyCenterSchema
       },
       {
         name: 'Warehouse',
@@ -29,6 +49,21 @@ import {ProductLineSchema} from "@modules/product-line/schemas/product-line.sche
       {
         name: "ProductLine",
         schema: ProductLineSchema
+      }, {
+        name: "Product",
+        schema: ProductSchema
+      }, {
+        name: "DistributionAgent",
+        schema: DistributionAgentSchema
+      }, {
+        name: 'Factory',
+        schema: FactorySchema
+      }, {
+        name: 'DistributionManagement',
+        schema: DistributionManagementSchema
+      }, {
+        name: 'Customer',
+        schema: CustomerSchema
       }
     ])
   ],
@@ -47,12 +82,39 @@ import {ProductLineSchema} from "@modules/product-line/schemas/product-line.sche
         schema: TokenSchema
       },
       {
+        name: 'WarrantyCenter',
+        schema: WarrantyCenterSchema
+      },
+      {
+        name: 'Warranty',
+        schema: WarrantySchema
+      },
+      {
         name: 'ExecutiveBoard',
         schema: ExecutiveBoardSchema
       },
       {
         name: "ProductLine",
         schema: ProductLineSchema
+      },
+      {
+        name: "Product",
+        schema: ProductSchema
+      }, {
+        name: "DistributionAgent",
+        schema: DistributionAgentSchema
+      }, {
+        name: 'Factory',
+        schema: FactorySchema
+      }, {
+        name: 'Order',
+        schema: OrderSchema
+      }, {
+        name: 'DistributionManagement',
+        schema: DistributionManagementSchema
+      }, {
+        name: 'Customer',
+        schema: CustomerSchema
       }
     ])
   ]
