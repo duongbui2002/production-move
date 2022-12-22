@@ -1,4 +1,15 @@
-import {Body, Controller, HttpCode, HttpException, HttpStatus, Param, Post, UseGuards} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards
+} from '@nestjs/common';
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {CreateDistributionAgentDto} from "@modules/distribution-agent/dto/create-distribution-agent.dto";
 import {AuthGuard} from "@common/guards/auth.guard";
@@ -18,6 +29,12 @@ import {CustomerService} from "@modules/customer/customer.service";
 import {WarrantyCenterService} from "@modules/warranty-center/warranty-center.service";
 import {Model, ProductStatus} from "@common/enums/common.enum";
 import e from "express";
+import {MailService} from "@modules/mail/mail.service";
+import {ProductStatisticDto} from "@common/dto/product-statistic.dto";
+import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
+import {ProductLineService} from "@modules/product-line/product-line.service";
+import {FilterQuery} from "mongoose";
+import {ProductDocument} from "@modules/product/schemas/product.schema";
 
 @Controller('distribution-agent')
 export class DistributionAgentController {
@@ -27,7 +44,9 @@ export class DistributionAgentController {
               private readonly productService: ProductService,
               private readonly warrantyService: WarrantyService,
               private readonly customerService: CustomerService,
-              private readonly warrantyCenterService: WarrantyCenterService) {
+              private readonly warrantyCenterService: WarrantyCenterService,
+              private readonly mailService: MailService,
+              private readonly productLineService: ProductLineService) {
   }
 
   @UseGuards(AuthGuard)
@@ -38,6 +57,18 @@ export class DistributionAgentController {
     const newData = await this.distributionAgentService.create(createDistributionAgentDto)
     return {
       data: newData,
+      success: true
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.ExecutiveBoard))
+  @Get()
+  async get(@Query() options: PaginationParamsDto) {
+    const {data, paginationOptions} = await this.distributionAgentService.findAll({}, options)
+    return {
+      data: data,
+      paginationOptions,
       success: true
     }
   }
@@ -53,7 +84,7 @@ export class DistributionAgentController {
       }
     })
     const distributionAgent = await this.distributionAgentService.findOne({_id: createDistributionManagementDto.distributionAgent})
-    console.log(distributionAgent)
+
 
     const newRequestExportProduct = await this.distributionManagementService.create({
       factory,
@@ -144,9 +175,10 @@ export class DistributionAgentController {
       status: 'sold',
     })
 
-    if (data.length === 0) {
+    if (data.length === 0 || paginationOptions.totalDocs < createWarrantyDto.products.length) {
       throw new HttpException('Products not found', HttpStatus.BAD_REQUEST)
     }
+
 
     let errorMessages: string[] = []
 
@@ -182,6 +214,7 @@ export class DistributionAgentController {
         to: `${warrantyCenter.name}`,
         from: `${distributionAgent.name}`
       }]
+      ele.timesOfWarranty += 1
       await ele.save()
     }
     return {
@@ -198,11 +231,11 @@ export class DistributionAgentController {
     const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
     const {
       data,
-      paginationOptions
+
     } = await this.productService.findAll({_id: {$in: warranty.products}}, {populate: [{path: 'producedBy'}]})
     const customer = await this.customerService.findOne({_id: warranty.customer._id})
 
-    if (warranty.status === 'finished') {
+    if (warranty.status === 'success') {
       for (const ele of data) {
         ele.status = 'sold'
         ele.currentlyBelong = customer._id
@@ -216,19 +249,6 @@ export class DistributionAgentController {
         await ele.save()
       }
     } else if (warranty.status === 'failure') {
-      for (const ele of data) {
-        ele.status = 'failure'
-        ele.currentlyBelong = ele.producedBy._id
-        ele.currentlyBelongModel = Model.FACTORY
-        ele.history = [...ele.history, {
-          type: 'return to factory',
-          from: distributionAgent.name,
-          to: ele.producedBy.name,
-          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
-        }]
-        await ele.save()
-      }
-
       const results = await this.productService.findAll({
         status: 'distributed',
         _id: {$in: warranty.products},
@@ -251,11 +271,119 @@ export class DistributionAgentController {
         }]
         await ele.save()
       }
+
+      for (const ele of data) {
+        ele.status = 'failure'
+        ele.currentlyBelong = ele.producedBy._id
+        ele.currentlyBelongModel = Model.FACTORY
+        ele.history = [...ele.history, {
+          type: 'return to factory',
+          from: distributionAgent.name,
+          to: ele.producedBy.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        }]
+        await ele.save()
+      }
     }
+    warranty.status = "finished"
+    await warranty.save()
     return {
       success: true,
       message: "Success"
     }
   }
 
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.DistributionAgent))
+  @Get('product/statistics')
+  async productStatistic(@AccountDecorator() account: AccountDocument, @Query() productStatisticDto: ProductStatisticDto, @Query() paginationParamsDto: PaginationParamsDto) {
+    let aggregate = []
+    let queryFilter: FilterQuery<ProductDocument> = {
+      distributedBy: account.belongTo
+    }
+
+    if (productStatisticDto.month) {
+      aggregate.push({$eq: [{$month: "$createdAt"}, productStatisticDto.month]})
+    }
+    if (productStatisticDto.year) {
+      aggregate.push({
+        $eq: [{$year: "$createdAt"}, productStatisticDto.year
+        ]
+      })
+    }
+
+    if (productStatisticDto.quarter) {
+      let startMonth;
+      let endMonth;
+      switch (productStatisticDto.quarter) {
+        case 1:
+          startMonth = 1;
+          endMonth = 3
+          break;
+        case 2:
+          startMonth = 4;
+          endMonth = 6
+          break;
+        case 3:
+          startMonth = 7;
+          endMonth = 9
+          break;
+        case 4:
+          startMonth = 10;
+          endMonth = 12
+          break;
+      }
+      aggregate.push({
+        $or: [{$eq: [{$month: "$createdAt"}, startMonth]}, {
+          $eq: [{$month: "$createdAt"}, startMonth + 1]
+        }, {$eq: [{$month: "$createdAt"}, endMonth]},
+        ]
+
+      })
+    }
+
+    if (productStatisticDto.productLineCode) {
+      const productLine = await this.productLineService.findOne({productLineCode: productStatisticDto.productLineCode})
+      Object.assign(queryFilter, {productLine: productLine})
+    }
+
+    if (productStatisticDto.status) {
+      if (productStatisticDto.status === 'sold') {
+        Object.assign(queryFilter, {status: {$in: [productStatisticDto.status, "warranting", "fixed"]}})
+      } else {
+        Object.assign(queryFilter, {status: productStatisticDto.status})
+      }
+    }
+
+    let {data, paginationOptions} = await this.productService.findAll({
+      $expr: {
+        $and: aggregate
+      },
+      ...queryFilter
+    }, {...paginationParamsDto})
+    return {
+      data,
+      paginationOptions
+    }
+  }
+
+
+  @Get("test-mail")
+  async testMail(@AccountDecorator() account: AccountDocument) {
+    await this.mailService.sendForgetPassword("https://example.com", "duongbuidinh600@gmail.com")
+    return {
+      success: true,
+      message: "Success"
+    }
+  }
+
+
+  @Get(":id")
+  async getById(@Param('id') id: string) {
+    const data = await this.distributionAgentService.findOne({_id: id})
+    return {
+      data: data,
+      success: true
+    }
+  }
 }

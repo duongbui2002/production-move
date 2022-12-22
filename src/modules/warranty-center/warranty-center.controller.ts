@@ -14,10 +14,16 @@ import {ProductService} from "@modules/product/product.service";
 import {Model} from "@common/enums/common.enum";
 import * as moment from "moment/moment";
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
+import {WarrantyQueryDto} from "@modules/warranty-center/dto/warranty-query.dto";
+import {ProductLineService} from "@modules/product-line/product-line.service";
 
 @Controller('warranty-center')
 export class WarrantyCenterController {
-  constructor(private readonly warrantyCenterService: WarrantyCenterService, private readonly distributionAgentService: DistributionAgentService, private readonly warrantyService: WarrantyService, private readonly productService: ProductService) {
+  constructor(private readonly warrantyCenterService: WarrantyCenterService,
+              private readonly productLineService: ProductLineService,
+              private readonly distributionAgentService: DistributionAgentService,
+              private readonly warrantyService: WarrantyService,
+              private readonly productService: ProductService) {
   }
 
   @UseGuards(AuthGuard)
@@ -33,29 +39,29 @@ export class WarrantyCenterController {
   }
 
 
-  @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard(Role.WarrantyCenter))
-  @Get('warranty-requests')
-  async getAllWarranties(@AccountDecorator() account: AccountDocument, @Query() options: PaginationParamsDto) {
-    const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
-    const {data, paginationOptions} = await this.warrantyService.findAll({warrantyCenter}, {
-      populate: [{
-        path: 'fromDistributionAgent',
-        select: 'name address phoneNumber'
-      }, {
-        path: 'customer',
-        select: 'name address phoneNumber'
-      }, {path: 'warrantyCenter', select: 'name address phoneNumber'}, {
-        path: 'products',
-        populate: [{path: 'productLine'}]
-      }]
-    })
-
-    return {
-      data,
-      paginationOptions
-    }
-  }
+  // @UseGuards(AuthGuard)
+  // @UseGuards(RoleGuard(Role.WarrantyCenter))
+  // @Get('warranty-requests')
+  // async getAllWarranties(@AccountDecorator() account: AccountDocument, @Query() options: PaginationParamsDto) {
+  //   const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
+  //   const {data, paginationOptions} = await this.warrantyService.findAll({warrantyCenter}, {
+  //     populate: [{
+  //       path: 'fromDistributionAgent',
+  //       select: 'name address phoneNumber'
+  //     }, {
+  //       path: 'customer',
+  //       select: 'name address phoneNumber'
+  //     }, {path: 'warrantyCenter', select: 'name address phoneNumber'}, {
+  //       path: 'products',
+  //       populate: [{path: 'productLine'}]
+  //     }]
+  //   })
+  //
+  //   return {
+  //     data,
+  //     paginationOptions
+  //   }
+  // }
 
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.WarrantyCenter))
@@ -81,7 +87,7 @@ export class WarrantyCenterController {
         }]
         await ele.save()
       }
-      warranty.status = 'finished'
+      warranty.status = 'success'
       await warranty.save()
     } else if (handleWarrantyDto.status === 'failure') {
       for (const ele of data) {
@@ -106,4 +112,26 @@ export class WarrantyCenterController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.WarrantyCenter))
+  @Get("warranty-requests")
+  async getAllWarranty(@AccountDecorator() account: AccountDocument, @Query() warrantyQuery: WarrantyQueryDto, @Query() options: PaginationParamsDto) {
+    const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
+    const {data, paginationOptions} = await this.warrantyService.findAll({warrantyCenter, ...warrantyQuery}, {
+      populate: [{
+        path: 'fromDistributionAgent',
+        select: 'name address phoneNumber'
+      }, {
+        path: 'products',
+        populate: [{path: 'productLine'}]
+      }, {
+        path: 'customer',
+        select: 'name address phoneNumber'
+      }, {path: 'warrantyCenter', select: 'name address phoneNumber'},]
+    })
+    return {
+      data,
+      paginationOptions
+    }
+  }
 }

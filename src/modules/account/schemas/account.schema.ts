@@ -20,7 +20,7 @@ export class Account {
   email: string;
 
   @Prop({
-    enum: ['executive-board', 'distribution-agent', 'factory', 'warranty-center'],
+    enum: ['ExecutiveBoard', 'DistributionAgent', 'Factory', 'WarrantyCenter'],
     type: [{type: mongoose.Schema.Types.String}]
   })
   roles: string[]

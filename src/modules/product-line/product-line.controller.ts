@@ -15,7 +15,6 @@ import {CreateProductLineDto} from "@modules/product-line/dto/create-product-lin
 import {ProductLineService} from "@modules/product-line/product-line.service";
 import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
 import {UpdateProductLineDto} from "@modules/product-line/dto/update-product-line";
-import {FilterProductDto} from "@modules/product/dto/filter-product.dto";
 import {AuthGuard} from "@common/guards/auth.guard";
 import RoleGuard from "@common/guards/roles.guard";
 import Role from "@common/enums/role.enum";
@@ -70,7 +69,6 @@ export class ProductLineController {
   @Get(":productLineCode")
   async findOne(@Param("productLineCode") productLineCode: string) {
     const productLine = await this.productLineService.findOne({productLineCode})
-
     return {
       success: true,
       data: productLine

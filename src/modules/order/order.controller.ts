@@ -39,14 +39,16 @@ export class OrderController {
       customer = await this.customerService.findOne({
         phoneNumber: createOrderDto.phoneNumber,
         address: createOrderDto.address,
-        name: createOrderDto.customerName
+        name: createOrderDto.customerName,
+        email: createOrderDto.email
       })
 
     } catch (e: any) {
       customer = await this.customerService.create({
         phoneNumber: createOrderDto.phoneNumber,
         address: createOrderDto.address,
-        name: createOrderDto.customerName
+        name: createOrderDto.customerName,
+        email: createOrderDto.email
       })
     }
 

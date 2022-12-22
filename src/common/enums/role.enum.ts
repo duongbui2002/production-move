@@ -1,8 +1,8 @@
 enum Role {
-  ExecutiveBoard = 'executive-board',
-  Factory = 'factory',
-  DistributionAgent = 'distribution-agent',
-  WarrantyCenter = 'warranty-center'
+  ExecutiveBoard = 'ExecutiveBoard',
+  Factory = 'Factory',
+  DistributionAgent = 'DistributionAgent',
+  WarrantyCenter = 'WarrantyCenter'
 }
 
 export default Role;

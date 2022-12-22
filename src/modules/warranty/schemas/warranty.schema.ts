@@ -19,13 +19,13 @@ export type WarrantyDocument = Warranty & Document
 export class Warranty {
   @Prop({
     required: true,
-    type: [{type: mongoose.Schema.Types.ObjectId}],
-    ref: 'Product'
+    type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Product'}],
+
   })
   products: ProductDocument[]
 
   @Prop({
-    enum: ['progress', 'finished', 'failure'],
+    enum: ['progress', "success", 'finished', 'failure'],
     default: 'progress'
   })
   status: string

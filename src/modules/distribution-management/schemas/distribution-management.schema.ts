@@ -43,6 +43,8 @@ export class DistributionManagement {
     default: null
   })
   note: string
+
+
 }
 
 export const DistributionManagementSchema = SchemaFactory.createForClass(DistributionManagement)

@@ -22,18 +22,19 @@ import {DistributionManagementModule} from './modules/distribution-management/di
 import mongoose from "mongoose";
 import {GoogleStorageModule} from "@modules/google-storage/google-storage.module";
 import googleStorageConfig from "@common/configs/google-storage.config";
+import {MailModule} from "@modules/mail/mail.module";
 
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-    load: [config,googleStorageConfig]
+    load: [config, googleStorageConfig]
   }), MongooseModule.forRootAsync({
     inject: [ConfigService],
     useFactory: async (configService: ConfigService) => ({
       uri: configService.get<string>("mongodb.uri")
     })
-  }), DatabaseModule, GoogleStorageModule, AccountsModule, WarehouseModule, AuthModule, TokensModule, ExecutiveBoardModule, ProductModule, ProductLineModule, WarrantyCenterModule, WarrantyModule, FactoryModule, DistributionAgentModule, OrderModule, CustomerModule, DistributionManagementModule],
+  }), DatabaseModule, GoogleStorageModule, MailModule, AccountsModule, WarehouseModule, AuthModule, TokensModule, ExecutiveBoardModule, ProductModule, ProductLineModule, WarrantyCenterModule, WarrantyModule, FactoryModule, DistributionAgentModule, OrderModule, CustomerModule, DistributionManagementModule],
   controllers: [AppController],
   providers: [AppService],
 })

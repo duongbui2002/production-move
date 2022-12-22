@@ -17,7 +17,6 @@ export class AccountsController {
   @Post('set-roles/:id')
   async setRoles(@Param('id') id: string, @Body() setRolesDto: SetRolesDto) {
     const account = await this.accountService.findOne({_id: id})
-
     const accountWithNewRoles = await this.accountService.update({_id: id}, setRolesDto, {new: true})
 
     return {

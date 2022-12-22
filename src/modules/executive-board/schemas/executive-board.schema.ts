@@ -2,6 +2,7 @@ import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
 import * as mongoose from "mongoose";
 import {Account} from "@modules/account/schemas/account.schema";
 import {Document} from "mongoose";
+import * as paginate from "mongoose-paginate-v2";
 
 export type ExecutiveBoardDocument = ExecutiveBoard & Document
 
@@ -26,6 +27,13 @@ export class ExecutiveBoard {
     trim: true
   })
   phoneNumber: string
+
+  @Prop({
+    default: "ExecutiveBoard"
+  })
+  model: string
 }
 
 export const ExecutiveBoardSchema = SchemaFactory.createForClass(ExecutiveBoard);
+
+ExecutiveBoardSchema.plugin(paginate)

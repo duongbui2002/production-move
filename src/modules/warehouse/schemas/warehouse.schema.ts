@@ -34,6 +34,11 @@ export class Warehouse {
     required: true
   })
   address: string
+
+  @Prop({
+    default: "Warehouse"
+  })
+  model: string
 }
 
 export const factoryPopulate: PopulateOptions = {

@@ -34,7 +34,7 @@ export class IsStringOrArrayConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    console.log(args);
+
     return `${args.constraints[0]} must be array or string`;
   }
 }

@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { OAuth2Client } from "google-auth-library";
-import { ConfigService } from "@nestjs/config";
+import {Injectable} from "@nestjs/common";
+import {OAuth2Client} from "google-auth-library";
+import {ConfigService} from "@nestjs/config";
 import * as nodemailer from "nodemailer";
 import {changePasswordContent} from "@common/template/email.template";
 
@@ -11,10 +11,12 @@ export class MailService {
 
   private async send(subject: string, to: string, html: string) {
     try {
+
       const clientId = this.configService.get("gmail.clientId");
       const clientSecret = this.configService.get("gmail.clientSecret");
       const user = this.configService.get("gmail.adminEmail");
       const refreshTokenEmail = this.configService.get("gmail.refreshTokenEmail");
+
 
       const myOAuth2Client = new OAuth2Client(
         clientId,
@@ -61,4 +63,5 @@ export class MailService {
     const html = changePasswordContent(url);
     await this.send("Forgot password", to, html);
   }
+
 }

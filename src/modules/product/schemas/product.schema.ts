@@ -90,6 +90,11 @@ export class Product {
   })
   currentlyBelongModel: string
 
+
+  @Prop({
+    default: 0
+  })
+  timesOfWarranty: number
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)

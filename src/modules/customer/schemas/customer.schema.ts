@@ -24,6 +24,11 @@ export class Customer {
   })
   phoneNumber: string
 
+  @Prop({
+    required: true,
+    unique: true
+  })
+  email: string
 
 }
 

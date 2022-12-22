@@ -27,6 +27,9 @@ import {ProductStatisticDto} from "@common/dto/product-statistic.dto";
 import {ProductLineService} from "@modules/product-line/product-line.service";
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {WarehouseService} from "@modules/warehouse/warehouse.service";
+import {DefectiveProductStatisticDto} from "@common/dto/defective-product-statistic.dto";
+import {FilterQuery} from "mongoose";
+import {Product} from "@modules/product/schemas/product.schema";
 
 @Controller('factory')
 export class FactoryController {
@@ -55,7 +58,7 @@ export class FactoryController {
   @Get()
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.ExecutiveBoard))
-  async findAll(@Query() options: PaginationParamsDto) {
+  async findAll(@Query() options: PaginationParamsDto,) {
     Object.assign(options, {lean: true})
     const {data, paginationOptions} = await this.factoryService.findAll({}, options)
     return {
@@ -196,7 +199,6 @@ export class FactoryController {
       message: "The products have been successfully exported",
       success: true
     }
-
   }
 
 
@@ -286,5 +288,40 @@ export class FactoryController {
       data
     }
   }
+
+
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.Factory))
+  @Get('defective-product/statistic')
+  async defectiveProductStatistic(@AccountDecorator() account: AccountDocument, @Query() defectiveProductStatisticDto: DefectiveProductStatisticDto, @Query() paginationParamsDto: PaginationParamsDto) {
+
+    let queryArray = []
+    const filterQuery: FilterQuery<Product> = {
+      timesOfWarranty: {$gt: 0}
+    }
+    if (defectiveProductStatisticDto.productLineCode) {
+      Object.assign(filterQuery, {productLine: defectiveProductStatisticDto.productLineCode})
+    }
+
+    if (defectiveProductStatisticDto.producedBy) {
+      Object.assign(filterQuery, {producedBy: defectiveProductStatisticDto.producedBy})
+    }
+
+    if (defectiveProductStatisticDto.distributionAgent) {
+      Object.assign(filterQuery, {distributionAgent: defectiveProductStatisticDto.distributionAgent})
+    }
+
+    let {data, paginationOptions} = await this.productService.findAll(filterQuery, {...paginationParamsDto})
+    delete filterQuery.timesOfWarranty
+
+    let result = await this.productService.findAll(filterQuery, {...paginationParamsDto})
+
+    return {
+      data,
+      totalProductPagination: result.paginationOptions,
+      paginationOptions
+    }
+  }
+
 
 }

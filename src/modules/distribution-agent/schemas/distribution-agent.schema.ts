@@ -26,6 +26,11 @@ export class DistributionAgent {
     required: true
   })
   phoneNumber: string
+
+  @Prop({
+    default: "DistributionAgent"
+  })
+  model: string
 }
 
 export const DistributionAgentSchema = SchemaFactory.createForClass(DistributionAgent)

@@ -27,6 +27,10 @@ export class Factory {
   })
   phoneNumber: string
 
+  @Prop({
+    default: "Factory"
+  })
+  model: string
 }
 
 export const FactorySchema = SchemaFactory.createForClass(Factory)

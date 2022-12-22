@@ -17,5 +17,8 @@ export class CreateOrderDto {
   @IsArray()
   @IsNotEmpty()
   orderProducts: string[]
+  @IsArray()
+  @IsNotEmpty()
+  email: string;
 
 }

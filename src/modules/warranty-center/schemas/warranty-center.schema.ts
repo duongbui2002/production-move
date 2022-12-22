@@ -22,7 +22,10 @@ export class WarrantyCenter {
     required: true
   })
   phoneNumber: string
-
+  @Prop({
+    default: "WarrantyCenter"
+  })
+  model: string
 }
 
 export const WarrantyCenterSchema = SchemaFactory.createForClass(WarrantyCenter)
