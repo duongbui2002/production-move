@@ -26,8 +26,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService, private readonly accountsService: AccountsService, private tokenService: TokensService) {
   }
 
-  // @UseGuards(AuthGuard)
-  // @UseGuards(RoleGuard(Role.ExecutiveBoard))
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.ExecutiveBoard))
   @Post("register")
   async register(@Body() registerAccountDto: RegisterAccountDto) {
     await this.accountsService.create(registerAccountDto)
