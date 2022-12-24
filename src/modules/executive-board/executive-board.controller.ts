@@ -162,7 +162,7 @@ export class ExecutiveBoardController {
   @UseGuards(AuthGuard)
   @Get('product-line/statistics')
   async productLineStatistic(@AccountDecorator() account: AccountDocument, @Query() paginationParamsDto: PaginationParamsDto) {
-    const result = await this.productService.aggregate([{
+    const defectiveProductEachProductLine = await this.productService.aggregate([{
       $match: {
         status: {
           $in: ['failure', 'warranting', 'fixed']
@@ -174,10 +174,36 @@ export class ExecutiveBoardController {
         total: {$sum: 1}
       }
     }])
-    console.log(result)
+    const defectiveProductLineIDs = []
+    for (const ele of defectiveProductEachProductLine) {
+      defectiveProductLineIDs.push(ele._id)
+    }
+    const productEachProductLine = await this.productService.aggregate([{
+      $match: {
+        productLine: {$in: defectiveProductLineIDs}
+      }
+    }, {
+      $group: {
+        _id: '$productLine',
+        total: {$sum: 1}
+      }
+    }])
+
+    const responses: any[] = []
+
+    for (let i = 0; i < defectiveProductLineIDs.length; i++) {
+      const productLine = await this.productLineService.findOne({_id: defectiveProductEachProductLine[i]}, {lean: true})
+      const defectiveProductEachProductLineEle = defectiveProductEachProductLine.find(ele => ele._id.toString() === productLine._id.toString());
+      const productEachProductLineEle = productEachProductLine.find(ele => ele._id.toString() === productLine._id.toString())
+      responses.push({
+        productLine,
+        defectiveProductNumbers: defectiveProductEachProductLineEle.total,
+        productOfProductLine: productEachProductLineEle.total
+      })
+    }
 
     return {
-      message: "Ok",
+      data: responses,
       success: true
     }
   }

@@ -68,7 +68,8 @@ export class WarrantyCenterController {
   @Post('handle-warranty')
   async handleWarranty(@Body() handleWarrantyDto: HandleWarrantyDto, @AccountDecorator() account: AccountDocument) {
     const warranty = await this.warrantyService.findOne({
-      _id: handleWarrantyDto.warranty
+      _id: handleWarrantyDto.warranty,
+      status: 'progress'
     }, {populate: {path: 'fromDistributionAgent'}})
     const distributionAgent = await this.distributionAgentService.findOne({_id: warranty.fromDistributionAgent})
     const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
@@ -92,12 +93,12 @@ export class WarrantyCenterController {
     } else if (handleWarrantyDto.status === 'failure') {
       for (const ele of data) {
         ele.status = 'failure'
-        ele.currentlyBelong = warranty.fromDistributionAgent._id
+        ele.currentlyBelong = distributionAgent._id;
         ele.currentlyBelongModel = Model.DISTRIBUTION_AGENT
         ele.history = [...ele.history, {
           type: 'failure',
           from: warrantyCenter.name,
-          to: warranty.fromDistributionAgent.name,
+          to: distributionAgent.name,
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
         }]
         await ele.save()

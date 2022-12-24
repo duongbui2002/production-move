@@ -10,6 +10,7 @@ import Role from "@common/enums/role.enum";
 import * as moment from "moment";
 import {FilterProductDto} from "@modules/product/dto/filter-product.dto";
 import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
+import {Product, ProductDocument} from "@modules/product/schemas/product.schema";
 
 @Controller('product')
 export class ProductController {
@@ -25,21 +26,24 @@ export class ProductController {
   async create(@Body() createProductDto: CreateProductDto) {
     const productLine = await this.productLineService.findOne({_id: createProductDto.productLine})
     const factory = await this.factoryService.findOne({_id: createProductDto.producedBy})
-
-    const newProduct = await this.productService.create({
-      producedBy: factory,
-      productLine,
-      history: [{
-        type: "produce",
-        from: factory.name,
-        to: factory.name,
-        createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm')
-      }],
-      currentlyBelong: factory,
-      currentlyBelongModel: 'Factory'
-    })
+    const newProducts: Product[] = []
+    for (let i = 0; i < createProductDto.numberOfProducts; i++) {
+      const newProduct = await this.productService.create({
+        producedBy: factory,
+        productLine,
+        history: [{
+          type: "produce",
+          from: factory.name,
+          to: factory.name,
+          createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm')
+        }],
+        currentlyBelong: factory,
+        currentlyBelongModel: 'Factory'
+      })
+      newProducts.push(newProduct)
+    }
     return {
-      data: newProduct,
+      data: newProducts,
       success: true
     }
   }

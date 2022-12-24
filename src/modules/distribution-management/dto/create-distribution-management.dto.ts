@@ -6,9 +6,6 @@ export class CreateDistributionManagementDto {
   @IsNotEmpty()
   factory: string
 
-  @IsString()
-  @IsNotEmpty()
-  distributionAgent: string
 
   @IsArray()
   @IsNotEmpty()

@@ -83,7 +83,7 @@ export class DistributionAgentController {
         path: 'warehouses'
       }
     })
-    const distributionAgent = await this.distributionAgentService.findOne({_id: createDistributionManagementDto.distributionAgent})
+    const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
 
 
     const newRequestExportProduct = await this.distributionManagementService.create({
@@ -236,7 +236,7 @@ export class DistributionAgentController {
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.DistributionAgent))
   async returnProduct(@AccountDecorator() account: AccountDocument, @Param('warrantyID') warrantyId: string) {
-    const warranty = await this.warrantyService.findOne({_id: warrantyId}, {})
+    const warranty = await this.warrantyService.findOne({_id: warrantyId, status: {$in: ['success', 'failure']}}, {})
     const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
     const {
       data,
@@ -258,9 +258,9 @@ export class DistributionAgentController {
         await ele.save()
       }
     } else if (warranty.status === 'failure') {
+
       const results = await this.productService.findAll({
         status: 'distributed',
-        _id: {$in: warranty.products},
         distributedBy: account.belongTo,
       })
 
@@ -282,13 +282,15 @@ export class DistributionAgentController {
       }
 
       for (const ele of data) {
+        const factory = await this.factoryService.findOne({_id: ele.producedBy})
+        console.log(factory)
         ele.status = 'failure'
-        ele.currentlyBelong = ele.producedBy._id
+        ele.currentlyBelong = factory._id
         ele.currentlyBelongModel = Model.FACTORY
         ele.history = [...ele.history, {
           type: 'return to factory',
           from: distributionAgent.name,
-          to: ele.producedBy.name,
+          to: factory.name,
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
         }]
         await ele.save()
