@@ -29,7 +29,7 @@ import {DistributionAgentService} from "@modules/distribution-agent/distribution
 import {WarehouseService} from "@modules/warehouse/warehouse.service";
 import {DefectiveProductStatisticDto} from "@common/dto/defective-product-statistic.dto";
 import {FilterQuery} from "mongoose";
-import {Product} from "@modules/product/schemas/product.schema";
+import {Product, ProductDocument} from "@modules/product/schemas/product.schema";
 
 @Controller('factory')
 export class FactoryController {
@@ -90,12 +90,16 @@ export class FactoryController {
     }
 
     const warehouse = await this.warehouseService.findOne({_id: importProductDto.warehouse})
+    console.log(warehouse)
     if (!importProductDto.importProducts) {
       const {data, paginationOptions} = await this.productService.findAll({
         producedBy: factory._id,
-        status: 'new'
+        status: 'new',
       })
 
+      if (data.length === 0) {
+        throw new HttpException('There are no products to add to stock.', HttpStatus.BAD_REQUEST)
+      }
       for (const ele of data) {
         await this.productService.update({_id: ele._id}, {
           belongToWarehouse: importProductDto.warehouse,
@@ -123,6 +127,9 @@ export class FactoryController {
       status: 'new'
     })
 
+    if (data.length === 0) {
+      throw new HttpException('There are no products to add to stock.', HttpStatus.BAD_REQUEST)
+    }
     for (const ele of data) {
       await this.productService.update({_id: ele._id}, {
         belongToWarehouse: importProductDto.warehouse,
@@ -165,6 +172,10 @@ export class FactoryController {
       $group: {_id: "$productLine", count: {$sum: 1}}
     }])
 
+    if (quantityEachProductLines.length === 0) {
+      throw new HttpException('The number of products in stock is not enough to deliver to the distribution agent.', HttpStatus.BAD_REQUEST)
+    }
+
     for (const quantityEachProductLineObject of quantityEachProductLines) {
       const productRequest = requestProducts.productRequest.find(ele => ele.productLine === quantityEachProductLineObject._id.toString())
       if (productRequest.quantity > quantityEachProductLineObject.count) {
@@ -206,12 +217,17 @@ export class FactoryController {
   @UseGuards(RoleGuard(Role.Factory))
   @Get('product/statistic')
   async productStatistic(@AccountDecorator() account: AccountDocument, @Query() productStatisticDto: ProductStatisticDto, @Query() paginationParamsDto: PaginationParamsDto) {
-    let queryArray = []
+    let aggregate = []
+
+    let queryFilter: FilterQuery<ProductDocument> = {
+      distributedBy: account.belongTo
+    }
+
     if (productStatisticDto.month) {
-      queryArray.push({$eq: [{$month: "$createdAt"}, productStatisticDto.month]})
+      aggregate.push({$eq: [{$month: "$createdAt"}, productStatisticDto.month]})
     }
     if (productStatisticDto.year) {
-      queryArray.push({
+      aggregate.push({
         $eq: [{$year: "$createdAt"}, productStatisticDto.year
         ]
       })
@@ -238,7 +254,7 @@ export class FactoryController {
           endMonth = 12
           break;
       }
-      queryArray.push({
+      aggregate.push({
         $or: [{$eq: [{$month: "$createdAt"}, startMonth]}, {
           $eq: [{$month: "$createdAt"}, startMonth + 1]
         }, {$eq: [{$month: "$createdAt"}, endMonth]},
@@ -247,45 +263,24 @@ export class FactoryController {
       })
     }
 
-    if (productStatisticDto.status === 'sold' && productStatisticDto.productLineCode) {
+    if (productStatisticDto.productLineCode) {
       const productLine = await this.productLineService.findOne({productLineCode: productStatisticDto.productLineCode})
-
-      let {data, paginationOptions} = await this.productService.findAll({
-        $expr: {
-          $and: queryArray
-        },
-        producedBy: account.belongTo,
-        status: 'sold',
-        productLine
-      }, {...paginationParamsDto})
-      return {
-        data,
-        paginationOptions
-      }
+      Object.assign(queryFilter, {productLine: productLine})
     }
 
     if (productStatisticDto.status) {
-      let {data, paginationOptions} = await this.productService.findAll({
-        $expr: {
-          $and: queryArray
-        },
-        producedBy: account.belongTo,
-        status: productStatisticDto.status
-      }, {...paginationParamsDto})
-      return {
-        paginationOptions,
-        data
-      }
+      Object.assign(queryFilter, {status: productStatisticDto.status})
     }
+
     let {data, paginationOptions} = await this.productService.findAll({
       $expr: {
-        $and: queryArray
+        $and: aggregate
       },
-      producedBy: account.belongTo,
+      ...queryFilter
     }, {...paginationParamsDto})
     return {
-      paginationOptions,
-      data
+      data,
+      paginationOptions
     }
   }
 
@@ -293,14 +288,16 @@ export class FactoryController {
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.Factory))
   @Get('defective-product/statistic')
-  async defectiveProductStatistic(@AccountDecorator() account: AccountDocument, @Query() defectiveProductStatisticDto: DefectiveProductStatisticDto, @Query() paginationParamsDto: PaginationParamsDto) {
+  async defectiveProductStatistic(@AccountDecorator() account: AccountDocument,
+                                  @Query() defectiveProductStatisticDto: DefectiveProductStatisticDto,
+                                  @Query() paginationParamsDto: PaginationParamsDto) {
 
     let queryArray = []
     const filterQuery: FilterQuery<Product> = {
       timesOfWarranty: {$gt: 0}
     }
-    if (defectiveProductStatisticDto.productLineCode) {
-      Object.assign(filterQuery, {productLine: defectiveProductStatisticDto.productLineCode})
+    if (defectiveProductStatisticDto.productLine) {
+      Object.assign(filterQuery, {productLine: defectiveProductStatisticDto.productLine})
     }
 
     if (defectiveProductStatisticDto.producedBy) {

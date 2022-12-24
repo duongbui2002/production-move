@@ -16,7 +16,9 @@ export class AccountsService extends BaseService<AccountDocument> {
       username: account.username,
       password: account.password,
       belongTo: account.belongTo,
-      displayName: account.displayName
+      displayName: account.displayName,
+      belongToModel: account.belongToModel,
+      roles: account.roles
     });
   }
 }

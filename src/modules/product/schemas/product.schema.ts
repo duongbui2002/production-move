@@ -81,7 +81,7 @@ export class Product {
     default: null,
     refPath: 'currentlyBelongModel'
   })
-  currentlyBelong: string
+  currentlyBelong   : string
 
 
   @Prop({

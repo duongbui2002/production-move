@@ -17,7 +17,7 @@ export class CreateOrderDto {
   @IsArray()
   @IsNotEmpty()
   orderProducts: string[]
-  @IsArray()
+  @IsString()
   @IsNotEmpty()
   email: string;
 

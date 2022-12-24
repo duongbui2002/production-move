@@ -129,14 +129,15 @@ export const verifyEmailContent = (verifyAccountUrl: string) => `
 </html>
 `;
 
-export const changePasswordContent = (resetPasswordUrl: string) => `
+
+export const productRecallNotify = (productLineCode: string) => `
 <!doctype html>
 <html lang="en-US">
 
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>Reset Password Email Template</title>
-    <meta name="description" content="Reset Password Email Template.">
+    <title>Product Recall Notify</title>
+    <meta name="description" content="Product Recall Notify Template.">
     <style type="text/css">
         a:hover {text-decoration: underline !important;}
     </style>
@@ -172,18 +173,15 @@ export const changePasswordContent = (resetPasswordUrl: string) => `
                                 </tr>
                                 <tr>
                                     <td style="padding:0 35px;">
-                                        <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">You have
-                                            requested to reset your password</h1>
+                                        <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Product line with code #${productLineCode} have an error and must be returned back</h1>
                                         <span
                                             style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                         <p style="color:#455056; font-size:15px;line-height:24px; margin:0;">
-                                            We cannot simply send you your old password. A unique link to reset your
-                                            password has been generated for you. To reset your password, click the
-                                            following link and follow the instructions.
+                                            This is an unexpected case, we will process and ship it back to you as soon as possible.
+                        Everything will happen as
+                        quickly as possible in the working time. We sincerely thank you for your patience.
                                         </p>
-                                        <a href="${resetPasswordUrl}"
-                                            style="background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;">Reset
-                                            Password</a>
+                                    
                                     </td>
                                 </tr>
                                 <tr>

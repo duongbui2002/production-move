@@ -2,7 +2,7 @@ import {Injectable} from "@nestjs/common";
 import {OAuth2Client} from "google-auth-library";
 import {ConfigService} from "@nestjs/config";
 import * as nodemailer from "nodemailer";
-import {changePasswordContent} from "@common/template/email.template";
+import { productRecallNotify} from "@common/template/email.template";
 
 @Injectable()
 export class MailService {
@@ -59,9 +59,13 @@ export class MailService {
     }
   }
 
-  async sendForgetPassword(url: string, to: string) {
-    const html = changePasswordContent(url);
-    await this.send("Forgot password", to, html);
+
+
+  async sendRecallNotification(productLineCode: string, to: string) {
+    const html = productRecallNotify(productLineCode);
+    this.send("Recall product", to, html);
+
+
   }
 
 }

@@ -119,6 +119,10 @@ export class DistributionAgentController {
         status: 'distributed'
       })
 
+
+      if (data.length === 0) {
+        throw new HttpException('There are no products to add to stock.', HttpStatus.BAD_REQUEST)
+      }
       for (const ele of data) {
         ele.history.push({
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
@@ -145,6 +149,11 @@ export class DistributionAgentController {
       status: 'distributed',
       _id: {$in: importProductDto.importProducts}
     })
+
+
+    if (data.length === 0) {
+      throw new HttpException('There are no products to add to stock.', HttpStatus.BAD_REQUEST)
+    }
 
     for (const ele of data) {
       ele.belongToWarehouse = distributionAgent.warehouses[warehouseIndex]
@@ -364,16 +373,6 @@ export class DistributionAgentController {
     return {
       data,
       paginationOptions
-    }
-  }
-
-
-  @Get("test-mail")
-  async testMail(@AccountDecorator() account: AccountDocument) {
-    await this.mailService.sendForgetPassword("https://example.com", "duongbuidinh600@gmail.com")
-    return {
-      success: true,
-      message: "Success"
     }
   }
 

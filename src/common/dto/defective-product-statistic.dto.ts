@@ -3,10 +3,9 @@ import {Type} from "class-transformer";
 
 export class DefectiveProductStatisticDto {
 
-
   @IsOptional()
   @IsString()
-  productLineCode?: string
+  productLine?: string
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,4 @@
-import {IsEmail, IsNotEmpty, IsString, MaxLength, MinLength} from "class-validator";
+import {IsAlpha, IsArray, IsEmail, IsNotEmpty, IsString, MaxLength, MinLength} from "class-validator";
 import {Match} from "@common/decorators/validate.decorator";
 import {Prop} from "@nestjs/mongoose";
 
@@ -38,4 +38,8 @@ export class RegisterAccountDto {
   @IsString()
   @Match("password", {message: "Password and confirm password does not match"})
   confirmPassword: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  roles: string[]
 }

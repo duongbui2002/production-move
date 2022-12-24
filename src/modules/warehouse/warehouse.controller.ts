@@ -33,7 +33,6 @@ export class WarehouseController {
 
   @Get()
   async findAll(@Query() options: PaginationParamsDto) {
-
     const {data, paginationOptions} = await this.warehouseService.findAll({}, options)
     for (const ele of data) {
       await ele.populate({
@@ -45,6 +44,23 @@ export class WarehouseController {
     return {
       data,
       paginationOptions
+    }
+  }
+
+  @Get(":id")
+  async findById(@Param("id") id: string) {
+
+    const warehouse = await this.warehouseService.findOne({_id: id})
+
+    await warehouse.populate({
+      model: warehouse.modelName,
+      path: 'belongTo',
+      select: 'name address phoneNumber'
+    })
+
+    return {
+      data: warehouse,
+      success: true
     }
   }
 }

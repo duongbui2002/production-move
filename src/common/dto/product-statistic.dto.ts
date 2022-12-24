@@ -30,4 +30,8 @@ export class ProductStatisticDto {
   @IsOptional()
   @IsString()
   productLineCode?: string
+
+  @IsOptional()
+  @IsString()
+  stakeholder?: string
 }
