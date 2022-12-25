@@ -21,7 +21,7 @@ export class Product {
 
   @Prop({
     default: "new",
-    enum: ['new', 'in-stock', 'sold', 'distributed', 'fixed', 'failure', 'warranting']
+    enum: ['new', 'in-stock', 'sold', 'distributed', 'fixed', 'failure', 'warranting', 'old']
   })
   status: string
 
@@ -85,7 +85,7 @@ export class Product {
     default: null,
     refPath: 'currentlyBelongModel'
   })
-  currentlyBelong: string
+  currentlyBelong: any
 
 
   @Prop({

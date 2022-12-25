@@ -35,6 +35,9 @@ import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
 import {ProductLineService} from "@modules/product-line/product-line.service";
 import {FilterQuery} from "mongoose";
 import {ProductDocument} from "@modules/product/schemas/product.schema";
+import {ReturnProductsToFactoryDto} from "@modules/distribution-agent/dto/return-products-to-factory.dto";
+import {productPopulate} from "@common/const/populate";
+
 
 @Controller('distribution-agent')
 export class DistributionAgentController {
@@ -309,17 +312,54 @@ export class DistributionAgentController {
   @Get('expired-products')
   async expiredProducts(@AccountDecorator() account: AccountDocument, @Query() paginationParamsDto: PaginationParamsDto) {
     const today = moment().utcOffset('+0700').toDate()
-    console.log(moment().isBefore(null))
+
     const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
     const {data, paginationOptions} = await this.productService.findAll({
       expiredDate: {$lte: today},
       status: 'distributed',
       distributedBy: distributionAgent._id
+    }, {
+      populate: productPopulate
     })
 
     return {
       data,
       paginationOptions
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.DistributionAgent))
+  @Post('return-products-to-factory')
+  async returnProducts(@AccountDecorator() account: AccountDocument, @Body() returnProductsToFactory: ReturnProductsToFactoryDto, @Query() paginationParamsDto: PaginationParamsDto) {
+
+
+    const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
+    const {data, paginationOptions} = await this.productService.findAll({
+      _id: {$in: returnProductsToFactory.products},
+      status: 'distributed',
+      distributedBy: distributionAgent._id
+    }, {})
+    for (const ele of data) {
+
+      let factory = await this.factoryService.findOne({_id: ele.producedBy})
+      ele.status = 'old'
+      ele.currentlyBelong = factory._id
+      ele.currentlyBelongModel = "Factory"
+      ele.history = [...ele.history, {
+        type: 'return to factory',
+        from: distributionAgent.name,
+        to: factory.name,
+        createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm'),
+        reason: 'No one has purchased this product'
+      }]
+
+      await ele.save()
+    }
+
+    return {
+      message: "The product has been returned to the factory",
+      success: true
     }
   }
 
@@ -392,10 +432,7 @@ export class DistributionAgentController {
       ...queryFilter
     }, {
       ...paginationParamsDto,
-      populate: [{path: 'currentlyBelong'}, {path: 'producedBy'}, {path: 'distributedBy'}, {path: 'belongToWarehouse'}, {
-        path: 'order',
-        populate: [{path: 'customer'}]
-      }]
+      populate: productPopulate
     })
     return {
       data,

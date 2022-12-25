@@ -16,6 +16,7 @@ import * as moment from "moment/moment";
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {WarrantyQueryDto} from "@modules/warranty-center/dto/warranty-query.dto";
 import {ProductLineService} from "@modules/product-line/product-line.service";
+import {warrantyPopulate} from "@common/const/populate";
 
 @Controller('warranty-center')
 export class WarrantyCenterController {
@@ -119,20 +120,29 @@ export class WarrantyCenterController {
   async getAllWarranty(@AccountDecorator() account: AccountDocument, @Query() warrantyQuery: WarrantyQueryDto, @Query() options: PaginationParamsDto) {
     const warrantyCenter = await this.warrantyCenterService.findOne({_id: account.belongTo})
     const {data, paginationOptions} = await this.warrantyService.findAll({warrantyCenter, ...warrantyQuery}, {
-      populate: [{
-        path: 'fromDistributionAgent',
-        select: 'name address phoneNumber'
-      }, {
-        path: 'products',
-        populate: [{path: 'productLine'}]
-      }, {
-        path: 'customer',
-        select: 'name address phoneNumber'
-      }, {path: 'warrantyCenter', select: 'name address phoneNumber'},]
+      populate: warrantyPopulate
     })
     return {
       data,
       paginationOptions
     }
   }
+
+  // TODO: fixbug here
+  @Get(':id')
+  async findWarrantyCenter(@Query() options: PaginationParamsDto, @Param('id') id: string) {
+    if (id) {
+      const data = await this.warrantyCenterService.findOne({_id: id})
+      return {
+        data: data,
+        success: true
+      }
+    }
+    const {data, paginationOptions} = await this.warrantyCenterService.findAll({}, options)
+    return {
+      data: data,
+      paginationOptions
+    }
+  }
+
 }

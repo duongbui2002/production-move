@@ -1,3 +1,4 @@
+
 declare module "mongoose" {
   interface QueryOptions {
     select?: string;
@@ -12,3 +13,4 @@ interface PaginatedDocumentsResponse<T> {
 }
 
 //'new', 'sold', 'distributed', 'fixed', 'failure', 'warranting'
+
