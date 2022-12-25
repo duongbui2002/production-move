@@ -26,7 +26,7 @@ export class DistributionManagement {
     ref: 'DistributionAgent',
     type: mongoose.Schema.Types.ObjectId
   })
-  distributionAgent: any
+  distributionAgent: DistributionAgentDocument
 
   @Prop({
     required: true,

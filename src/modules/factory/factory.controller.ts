@@ -30,6 +30,7 @@ import {WarehouseService} from "@modules/warehouse/warehouse.service";
 import {DefectiveProductStatisticDto} from "@common/dto/defective-product-statistic.dto";
 import {FilterQuery} from "mongoose";
 import {Product, ProductDocument} from "@modules/product/schemas/product.schema";
+import {ProductRequestsDto} from "@modules/distribution-management/dto/product-request.dto";
 
 @Controller('factory')
 export class FactoryController {
@@ -67,14 +68,6 @@ export class FactoryController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const factory = await this.factoryService.findOne({_id: id})
-    return {
-      success: true,
-      data: factory
-    }
-  }
 
   @Post('imports')
   @UseGuards(AuthGuard)
@@ -193,6 +186,7 @@ export class FactoryController {
         ele.belongToWarehouse = null
         ele.distributedBy = requestProducts.distributionAgent
         ele.status = 'distributed'
+        ele.expiredDate = moment().utcOffset('+0700').add(365, 'days').toDate()
         ele.history.push({
           createdAt: moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm').toString(),
           type: 'exported',
@@ -320,5 +314,28 @@ export class FactoryController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.Factory))
+  @Get('product-requests')
+  async getAllProductRequest(@AccountDecorator() account: AccountDocument, @Query() options: PaginationParamsDto, @Query() filter: ProductRequestsDto) {
+    const factory = await this.factoryService.findOne({_id: account.belongTo})
+    const {
+      data,
+      paginationOptions
+    } = await this.distributionManagementService.findAll({factory, ...filter}, options)
 
+    return {
+      data,
+      paginationOptions
+    }
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const factory = await this.factoryService.findOne({_id: id})
+    return {
+      success: true,
+      data: factory
+    }
+  }
 }

@@ -11,6 +11,8 @@ import * as moment from "moment";
 import {FilterProductDto} from "@modules/product/dto/filter-product.dto";
 import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
 import {Product, ProductDocument} from "@modules/product/schemas/product.schema";
+import {AccountDecorator} from "@common/decorators/account.decorator";
+import {AccountDocument} from "@modules/account/schemas/account.schema";
 
 @Controller('product')
 export class ProductController {
@@ -23,11 +25,11 @@ export class ProductController {
   @Post()
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.Factory))
-  async create(@Body() createProductDto: CreateProductDto) {
+  async create(@Body() createProductDto: CreateProductDto, @AccountDecorator() account: AccountDocument) {
     const productLine = await this.productLineService.findOne({_id: createProductDto.productLine})
-    const factory = await this.factoryService.findOne({_id: createProductDto.producedBy})
+    const factory = await this.factoryService.findOne({_id: account.belongTo})
     const newProducts: Product[] = []
-    for (let i = 0; i < createProductDto.numberOfProducts; i++) {
+    for (let i = 0; i < createProductDto.quantity; i++) {
       const newProduct = await this.productService.create({
         producedBy: factory,
         productLine,

@@ -72,7 +72,7 @@ export class OrderController {
       ele.currentlyBelong = customer._id
       ele.belongToWarehouse = null
       ele.currentlyBelongModel = 'Customer'
-
+      ele.expiredDate = null
       await ele.save()
     }
     await newOrder.populate([{

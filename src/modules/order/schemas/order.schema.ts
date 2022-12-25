@@ -17,13 +17,15 @@ export class Order {
 
   @Prop({
     required: true,
-    type: mongoose.Schema.Types.ObjectId
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Customer'
   })
   customer: Customer
 
   @Prop({
     required: true,
-    type: [{type: mongoose.Schema.Types.ObjectId}]
+    type: [{type: mongoose.Schema.Types.ObjectId}],
+    ref: 'Product'
   })
   orderItems: Product[]
 

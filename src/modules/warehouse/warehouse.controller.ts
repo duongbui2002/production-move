@@ -1,10 +1,27 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Query} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Query,
+  UseGuards
+} from '@nestjs/common';
 import {WarehouseService} from './warehouse.service';
 import {CreateWarehouseDto} from './dto/create-warehouse.dto';
 import {FactoryService} from "@modules/factory/factory.service";
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
-import {distributionPopulate, factoryPopulate} from "@modules/warehouse/schemas/warehouse.schema";
+import {distributionPopulate, factoryPopulate, WarehouseDocument} from "@modules/warehouse/schemas/warehouse.schema";
+import {AuthGuard} from "@common/guards/auth.guard";
+import {AccountDecorator} from "@common/decorators/account.decorator";
+import {AccountDocument} from "@modules/account/schemas/account.schema";
+import {FilterQuery} from "mongoose";
+import Role from "@common/enums/role.enum";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -32,8 +49,14 @@ export class WarehouseController {
   }
 
   @Get()
-  async findAll(@Query() options: PaginationParamsDto) {
-    const {data, paginationOptions} = await this.warehouseService.findAll({}, options)
+  @UseGuards(AuthGuard)
+  async findAll(@Query() options: PaginationParamsDto, @AccountDecorator() account: AccountDocument) {
+    const filter: FilterQuery<WarehouseDocument> = {}
+    if (!account.roles.includes(Role.ExecutiveBoard)) {
+      Object.assign(filter, {belongTo: account.belongTo})
+    }
+
+    const {data, paginationOptions} = await this.warehouseService.findAll(filter, options)
     for (const ele of data) {
       await ele.populate({
         model: ele.modelName,

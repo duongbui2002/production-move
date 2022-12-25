@@ -75,13 +75,17 @@ export class Product {
   })
   warrantyExpiresAt: Date
 
+  @Prop({
+    default: null
+  })
+  expiredDate: Date
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     default: null,
     refPath: 'currentlyBelongModel'
   })
-  currentlyBelong   : string
+  currentlyBelong: string
 
 
   @Prop({

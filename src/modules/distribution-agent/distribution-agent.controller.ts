@@ -306,6 +306,25 @@ export class DistributionAgentController {
 
   @UseGuards(AuthGuard)
   @UseGuards(RoleGuard(Role.DistributionAgent))
+  @Get('expired-products')
+  async expiredProducts(@AccountDecorator() account: AccountDocument, @Query() paginationParamsDto: PaginationParamsDto) {
+    const today = moment().utcOffset('+0700').toDate()
+    console.log(moment().isBefore(null))
+    const distributionAgent = await this.distributionAgentService.findOne({_id: account.belongTo})
+    const {data, paginationOptions} = await this.productService.findAll({
+      expiredDate: {$lte: today},
+      status: 'distributed',
+      distributedBy: distributionAgent._id
+    })
+
+    return {
+      data,
+      paginationOptions
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @UseGuards(RoleGuard(Role.DistributionAgent))
   @Get('product/statistics')
   async productStatistic(@AccountDecorator() account: AccountDocument, @Query() productStatisticDto: ProductStatisticDto, @Query() paginationParamsDto: PaginationParamsDto) {
     let aggregate = []
@@ -371,7 +390,13 @@ export class DistributionAgentController {
         $and: aggregate
       },
       ...queryFilter
-    }, {...paginationParamsDto})
+    }, {
+      ...paginationParamsDto,
+      populate: [{path: 'currentlyBelong'}, {path: 'producedBy'}, {path: 'distributedBy'}, {path: 'belongToWarehouse'}, {
+        path: 'order',
+        populate: [{path: 'customer'}]
+      }]
+    })
     return {
       data,
       paginationOptions

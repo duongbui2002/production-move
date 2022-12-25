@@ -6,9 +6,6 @@ import {IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
 
 export class CreateProductDto {
 
-  @IsString()
-  @IsNotEmpty()
-  producedBy: string
 
 
   @IsString()
@@ -17,6 +14,6 @@ export class CreateProductDto {
 
   @IsNumber()
   @IsOptional()
-  numberOfProducts?: number = 1
+  quantity?: number = 1
 
 }
