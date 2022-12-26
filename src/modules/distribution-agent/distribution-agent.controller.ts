@@ -65,7 +65,6 @@ export class DistributionAgentController {
   }
 
   @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard(Role.ExecutiveBoard))
   @Get()
   async get(@Query() options: PaginationParamsDto) {
     const {data, paginationOptions} = await this.distributionAgentService.findAll({}, options)

@@ -58,7 +58,6 @@ export class FactoryController {
 
   @Get()
   @UseGuards(AuthGuard)
-  @UseGuards(RoleGuard(Role.ExecutiveBoard))
   async findAll(@Query() options: PaginationParamsDto,) {
     Object.assign(options, {lean: true})
     const {data, paginationOptions} = await this.factoryService.findAll({}, options)

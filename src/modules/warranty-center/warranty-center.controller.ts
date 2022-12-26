@@ -128,20 +128,26 @@ export class WarrantyCenterController {
     }
   }
 
-  // TODO: fixbug here
-  @Get(':id')
-  async findWarrantyCenter(@Query() options: PaginationParamsDto, @Param('id') id: string) {
-    if (id) {
-      const data = await this.warrantyCenterService.findOne({_id: id})
-      return {
-        data: data,
-        success: true
-      }
-    }
+  // TODO: test here
+
+  @UseGuards(AuthGuard)
+  @Get()
+  async get(@Query() options: PaginationParamsDto) {
     const {data, paginationOptions} = await this.warrantyCenterService.findAll({}, options)
     return {
       data: data,
-      paginationOptions
+      paginationOptions,
+      success: true
+    }
+  }
+
+  // TODO: fixbug here
+  @Get(":id")
+  async getById(@Param('id') id: string) {
+    const data = await this.warrantyCenterService.findOne({_id: id})
+    return {
+      data: data,
+      success: true
     }
   }
 
