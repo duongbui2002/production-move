@@ -7,7 +7,6 @@ import {IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
 export class CreateProductDto {
 
 
-
   @IsString()
   @IsNotEmpty()
   productLine: string
