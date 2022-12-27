@@ -128,7 +128,7 @@ export class WarrantyCenterController {
     }
   }
 
-  // TODO: test here
+
 
   @UseGuards(AuthGuard)
   @Get()
