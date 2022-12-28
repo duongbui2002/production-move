@@ -20,13 +20,13 @@ export class Customer {
 
   @Prop({
     required: true,
-    unique: true
+
   })
   phoneNumber: string
 
   @Prop({
     required: true,
-    unique: true
+
   })
   email: string
 

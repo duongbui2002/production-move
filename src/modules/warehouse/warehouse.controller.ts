@@ -59,7 +59,7 @@ export class WarehouseController {
     const {data, paginationOptions} = await this.warehouseService.findAll(filter, options)
     for (const ele of data) {
       await ele.populate({
-        model: ele.modelName,
+        model: ele.model,
         path: 'belongTo',
         select: 'name address phoneNumber'
       })
@@ -76,7 +76,7 @@ export class WarehouseController {
     const warehouse = await this.warehouseService.findOne({_id: id})
 
     await warehouse.populate({
-      model: warehouse.modelName,
+      model: warehouse.model,
       path: 'belongTo',
       select: 'name address phoneNumber'
     })

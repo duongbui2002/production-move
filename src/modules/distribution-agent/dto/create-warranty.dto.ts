@@ -2,16 +2,28 @@ import {IsArray, IsNotEmpty, IsString} from "class-validator";
 import {Customer} from "@modules/customer/schemas/customer.schema";
 
 export class CreateWarrantyDto {
-  @IsNotEmpty()
-  @IsArray()
-  products: string[]
+    @IsNotEmpty()
+    @IsArray()
+    products: string[]
 
 
-  @IsNotEmpty()
-  @IsString()
-  customer: string
+    @IsString()
+    @IsNotEmpty()
+    customerName: string
 
-  @IsNotEmpty()
-  @IsString()
-  warrantyCenter: string
+    @IsString()
+    @IsNotEmpty()
+    address: string
+
+    @IsString()
+    @IsNotEmpty()
+    phoneNumber: string
+
+    @IsString()
+    @IsNotEmpty()
+    email: string;
+
+    @IsNotEmpty()
+    @IsString()
+    warrantyCenter: string
 }
