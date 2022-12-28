@@ -67,7 +67,7 @@ export class ProductController {
   @Get(":id")
   //@UseGuards(AuthGuard)
   async getById(@Param("id") id: string) {
-    const data = await this.productService.findOne({ _id: id });
+    const data = await this.productService.findOne({ _id: id }, { populate: productPopulate });
     return {
       data,
       success: true
