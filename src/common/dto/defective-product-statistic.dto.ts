@@ -1,4 +1,4 @@
-import {IsNumber, IsOptional, IsString, Max, Min} from "class-validator";
+import {IsMongoId, IsNumber, IsOptional, IsString, Max, Min} from "class-validator";
 import {Type} from "class-transformer";
 
 export class DefectiveProductStatisticDto {
@@ -13,6 +13,6 @@ export class DefectiveProductStatisticDto {
 
 
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   distributionAgent?: string
 }
