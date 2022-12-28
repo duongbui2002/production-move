@@ -12,7 +12,7 @@ import {WarrantyCenterService} from "@modules/warranty-center/warranty-center.se
 import * as moment from "moment";
 import {DistributionAgentService} from "@modules/distribution-agent/distribution-agent.service";
 import {CustomerService} from "@modules/customer/customer.service";
-import {PaginationParamsDto} from "@common/dto/pagination-params.dto";
+
 
 @Controller()
 export class OrderController {
