@@ -1,12 +1,12 @@
-import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose";
-import {Factory} from "@modules/factory/schemas/factory.schema";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Factory } from "@modules/factory/schemas/factory.schema";
 import * as mongoose from "mongoose";
 import {
   DistributionAgent,
   DistributionAgentDocument
 } from "@modules/distribution-agent/schemas/distribution-agent.schema";
-import {ProductRequest} from "@modules/distribution-management/schemas/productRequest";
-import {Document} from "mongoose";
+import { ProductRequest } from "@modules/distribution-management/schemas/productRequest";
+import { Document } from "mongoose";
 import * as paginate from "mongoose-paginate-v2";
 
 export type DistributionManagementDocument = Document & DistributionManagement
@@ -17,36 +17,37 @@ export type DistributionManagementDocument = Document & DistributionManagement
 export class DistributionManagement {
   @Prop({
     required: true,
-    ref: 'Factory',
+    ref: "Factory",
     type: mongoose.Schema.Types.ObjectId
   })
-  factory: Factory
+  factory: Factory;
 
   @Prop({
-    ref: 'DistributionAgent',
-    type: mongoose.Schema.Types.ObjectId
+    ref: "DistributionAgent",
+    type: mongoose.Schema.Types.ObjectId,
+
   })
-  distributionAgent: DistributionAgentDocument
+  distributionAgent: DistributionAgentDocument;
 
   @Prop({
-    required: true,
+    required: true
   })
-  productRequest: ProductRequest[]
+  productRequest: ProductRequest[];
 
   @Prop({
-    enum: ['wait', 'exported', 'rejected'],
-    default: 'wait'
+    enum: ["wait", "exported", "rejected"],
+    default: "wait"
   })
-  status: string
+  status: string;
 
   @Prop({
     default: null
   })
-  note: string
+  note: string;
 
 
 }
 
-export const DistributionManagementSchema = SchemaFactory.createForClass(DistributionManagement)
+export const DistributionManagementSchema = SchemaFactory.createForClass(DistributionManagement);
 
-DistributionManagementSchema.plugin(paginate)
+DistributionManagementSchema.plugin(paginate);
