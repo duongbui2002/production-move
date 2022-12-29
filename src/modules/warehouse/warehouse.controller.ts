@@ -1,15 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  Query,
-  UseGuards
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    HttpCode,
+    HttpStatus,
+    Query,
+    UseGuards
 } from '@nestjs/common';
 import {WarehouseService} from './warehouse.service';
 import {CreateWarehouseDto} from './dto/create-warehouse.dto';
@@ -25,65 +25,69 @@ import Role from "@common/enums/role.enum";
 
 @Controller('warehouse')
 export class WarehouseController {
-  constructor(private readonly warehouseService: WarehouseService,
-              private readonly factoryService: FactoryService,
-              private readonly distributionAgentService: DistributionAgentService) {
-  }
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createWarehouseDto: CreateWarehouseDto) {
-
-    if (createWarehouseDto.belongToModel == 'Factory') {
-      await this.factoryService.findOne({_id: createWarehouseDto.belongTo})
-
-    } else if (createWarehouseDto.belongToModel == 'DistributionAgent') {
-      await this.distributionAgentService.findOne({_id: createWarehouseDto.belongTo})
-    }
-    const newWarehouse = await this.warehouseService.create(createWarehouseDto);
-
-    return {
-      success: true,
-      data: newWarehouse
-    }
-  }
-
-  @Get()
-  @UseGuards(AuthGuard)
-  async findAll(@Query() options: PaginationParamsDto, @AccountDecorator() account: AccountDocument) {
-    const filter: FilterQuery<WarehouseDocument> = {}
-    if (!account.roles.includes(Role.ExecutiveBoard)) {
-      Object.assign(filter, {belongTo: account.belongTo})
+    constructor(private readonly warehouseService: WarehouseService,
+                private readonly factoryService: FactoryService,
+                private readonly distributionAgentService: DistributionAgentService) {
     }
 
-    const {data, paginationOptions} = await this.warehouseService.findAll(filter, options)
-    for (const ele of data) {
-      await ele.populate({
-        model: ele.model,
-        path: 'belongTo',
-        select: 'name address phoneNumber'
-      })
+    @Post()
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.CREATED)
+    async create(@Body() createWarehouseDto: CreateWarehouseDto) {
+
+        if (createWarehouseDto.belongToModel == 'Factory') {
+            await this.factoryService.findOne({_id: createWarehouseDto.belongTo})
+
+        } else if (createWarehouseDto.belongToModel == 'DistributionAgent') {
+            await this.distributionAgentService.findOne({_id: createWarehouseDto.belongTo})
+        }
+        const newWarehouse = await this.warehouseService.create(createWarehouseDto);
+
+        return {
+            success: true,
+            data: newWarehouse
+        }
     }
-    return {
-      data,
-      paginationOptions
+
+    @Get()
+    @UseGuards(AuthGuard)
+    async findAll(@Query() options: PaginationParamsDto, @AccountDecorator() account: AccountDocument) {
+        const filter: FilterQuery<WarehouseDocument> = {}
+        if (!account.roles.includes(Role.ExecutiveBoard)) {
+            Object.assign(filter, {belongTo: account.belongTo})
+        }
+
+        const {data, paginationOptions} = await this.warehouseService.findAll(filter, options)
+        const test = await this.warehouseService.findOne({_id: data[0]._id})
+        console.log(test)
+        for (const ele of data) {
+            console.log(ele)
+            await ele.populate({
+                model: ele.model,
+                path: 'belongTo',
+                select: 'name address phoneNumber'
+            })
+        }
+        return {
+            data,
+            paginationOptions
+        }
     }
-  }
 
-  @Get(":id")
-  async findById(@Param("id") id: string) {
+    @Get(":id")
+    async findById(@Param("id") id: string) {
 
-    const warehouse = await this.warehouseService.findOne({_id: id})
+        const warehouse = await this.warehouseService.findOne({_id: id})
 
-    await warehouse.populate({
-      model: warehouse.model,
-      path: 'belongTo',
-      select: 'name address phoneNumber'
-    })
+        await warehouse.populate({
+            model: warehouse.model,
+            path: 'belongTo',
+            select: 'name address phoneNumber'
+        })
 
-    return {
-      data: warehouse,
-      success: true
+        return {
+            data: warehouse,
+            success: true
+        }
     }
-  }
 }
