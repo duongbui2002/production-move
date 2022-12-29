@@ -1,13 +1,13 @@
-import {IsNumber, IsOptional, IsString, Min} from "class-validator";
-import {Type} from "class-transformer";
-import {Prop} from "@nestjs/mongoose";
+import { IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { Type } from "class-transformer";
+import { Prop } from "@nestjs/mongoose";
 import mongoose from "mongoose";
-import {ProductLine} from "@modules/product-line/schemas/product-line.schema";
+import { ProductLine } from "@modules/product-line/schemas/product-line.schema";
 
 export class FilterProductDto {
   @IsOptional()
   @IsString()
-  producedBy?: string
+  producedBy?: string;
 
   @IsOptional()
   @IsString()
@@ -19,14 +19,14 @@ export class FilterProductDto {
 
   @IsOptional()
   @IsString()
-  belongToWarehouse?: string
+  belongToWarehouse?: string;
   @IsOptional()
   @IsString()
-  productLine?: string
+  productLine?: string;
 
   @IsOptional()
   @IsString()
-  currentlyBelong?: string
+  currentlyBelong?: string;
 
 
 }
