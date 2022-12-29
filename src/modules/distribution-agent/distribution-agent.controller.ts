@@ -122,6 +122,8 @@ export class DistributionAgentController {
         distributedBy: distributionAgent._id,
         belongToWarehouse: null,
         status: "distributed"
+      }, {
+        pagination: false
       });
 
 
@@ -153,6 +155,8 @@ export class DistributionAgentController {
       belongToWarehouse: null,
       status: "distributed",
       _id: { $in: importProductDto.importProducts }
+    }, {
+      pagination: false
     });
 
 

@@ -83,11 +83,13 @@ export class FactoryController {
     }
 
     const warehouse = await this.warehouseService.findOne({ _id: importProductDto.warehouse });
-    console.log(warehouse);
+
     if (!importProductDto.importProducts) {
       const { data, paginationOptions } = await this.productService.findAll({
         producedBy: factory._id,
         status: "new"
+      }, {
+        pagination: false
       });
 
       if (data.length === 0) {
@@ -118,6 +120,8 @@ export class FactoryController {
       producedBy: factory._id,
       belongToWarehouse: null,
       status: "new"
+    }, {
+      pagination: false
     });
 
     if (data.length === 0) {
