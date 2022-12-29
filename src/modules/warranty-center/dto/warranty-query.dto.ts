@@ -5,9 +5,6 @@ export class WarrantyQueryDto {
   @IsOptional()
   status?: string
 
-  @IsString()
-  @IsOptional()
-  fromDistributionAgent?: string
 
 
   @IsString()
