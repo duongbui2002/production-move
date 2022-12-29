@@ -30,7 +30,6 @@ import { WarrantyService } from "@modules/warranty/warranty.service";
 import { CustomerService } from "@modules/customer/customer.service";
 import { WarrantyCenterService } from "@modules/warranty-center/warranty-center.service";
 import { Model, ProductStatus } from "@common/enums/common.enum";
-import e from "express";
 import { MailService } from "@modules/mail/mail.service";
 import { ProductStatisticDto } from "@common/dto/product-statistic.dto";
 import { PaginationParamsDto } from "@common/dto/pagination-params.dto";
@@ -137,7 +136,7 @@ export class DistributionAgentController {
           from: `${distributionAgent.name}`
         });
         ele.belongToWarehouse = distributionAgent.warehouses[warehouseIndex];
-
+        ele.status = ProductStatus.IN_DISTRIBUTION_STOCK;
         ele.currentlyBelong = distributionAgent._id;
         ele.currentlyBelongModel = "DistributionAgent";
         await ele.save();
@@ -163,6 +162,7 @@ export class DistributionAgentController {
 
     for (const ele of data) {
       ele.belongToWarehouse = distributionAgent.warehouses[warehouseIndex];
+      ele.status = ProductStatus.IN_DISTRIBUTION_STOCK;
       ele.history.push({
         createdAt: moment().utcOffset("+0700").format("YYYY-MM-DD HH:mm"),
         type: "import",
@@ -303,7 +303,7 @@ export class DistributionAgentController {
     } else if (warranty.status === "failure") {
 
       const results = await this.productService.findAll({
-        status: "distributed",
+        status: { $in: [ProductStatus.DISTRIBUTED, ProductStatus.IN_DISTRIBUTION_STOCK] },
         distributedBy: account.belongTo
       });
 
@@ -356,7 +356,7 @@ export class DistributionAgentController {
     const distributionAgent = await this.distributionAgentService.findOne({ _id: account.belongTo });
     const { data, paginationOptions } = await this.productService.findAll({
       expiredDate: { $lte: today },
-      status: "distributed",
+      status: { $in: [ProductStatus.IN_DISTRIBUTION_STOCK, ProductStatus.DISTRIBUTED] },
       distributedBy: distributionAgent._id
     }, {
       populate: productPopulate
@@ -377,7 +377,7 @@ export class DistributionAgentController {
     const distributionAgent = await this.distributionAgentService.findOne({ _id: account.belongTo });
     const { data, paginationOptions } = await this.productService.findAll({
       _id: { $in: returnProductsToFactory.products },
-      status: "distributed",
+      status: { $in: [ProductStatus.DISTRIBUTED, ProductStatus.IN_DISTRIBUTION_STOCK] },
       distributedBy: distributionAgent._id
     }, {});
     for (const ele of data) {
