@@ -39,3 +39,12 @@ export const distributionManagementPopulate: PopulateOptions[] = [{
 }, {
   path: "factory"
 }];
+
+
+export const orderPopulate: PopulateOptions[] = [{
+  path: "orderItems"
+}, {
+  path: "distributionAgent"
+}, {
+  path: "customer"
+}];

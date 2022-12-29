@@ -38,7 +38,7 @@ import { ProductLineService } from "@modules/product-line/product-line.service";
 import { FilterQuery } from "mongoose";
 import { ProductDocument } from "@modules/product/schemas/product.schema";
 import { ReturnProductsToFactoryDto } from "@modules/distribution-agent/dto/return-products-to-factory.dto";
-import { productPopulate } from "@common/const/populate";
+import { orderPopulate, productPopulate } from "@common/const/populate";
 import { OrderService } from "@modules/order/order.service";
 
 
@@ -187,7 +187,9 @@ export class DistributionAgentController {
 
     const distributionAgent = await this.distributionAgentService.findOne({ _id: account.belongTo });
 
-    const { data, paginationOptions } = await this.orderService.findAll({ distributionAgent: distributionAgent._id });
+    const { data, paginationOptions } = await this.orderService.findAll({ distributionAgent: distributionAgent._id }, {
+      populate: orderPopulate
+    });
     return {
       data,
       paginationOptions
