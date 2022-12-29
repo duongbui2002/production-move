@@ -90,7 +90,7 @@ export class WarrantyCenterController {
     if (handleWarrantyDto.status === "success") {
       for (const ele of data) {
         ele.status = "fixed";
-        ele.currentlyBelong = warranty.fromDistributionAgent._id;
+        ele.currentlyBelong =  distributionAgent._id;
         ele.currentlyBelongModel = Model.DISTRIBUTION_AGENT;
         ele.history = [...ele.history, {
           type: "warranted",
