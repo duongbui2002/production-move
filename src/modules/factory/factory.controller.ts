@@ -89,6 +89,7 @@ export class FactoryController {
         producedBy: factory._id,
         status: "new"
       }, {
+
         pagination: false
       });
 
@@ -121,6 +122,7 @@ export class FactoryController {
       belongToWarehouse: null,
       status: "new"
     }, {
+
       pagination: false
     });
 
