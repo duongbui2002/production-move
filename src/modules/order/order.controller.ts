@@ -75,6 +75,8 @@ export class OrderController {
         from: distributionAgent.name,
         to: customer.name
       });
+
+
       ele.currentlyBelong = customer._id;
       ele.belongToWarehouse = null;
       ele.currentlyBelongModel = "Customer";
