@@ -99,9 +99,9 @@ export class FactoryController {
       for (const ele of data) {
         await this.productService.update({ _id: ele._id }, {
           belongToWarehouse: importProductDto.warehouse,
-          currentlyBelong: importProductDto.warehouse,
+          currentlyBelong: factory._id,
           status: "in-stock",
-          currentlyBelongModel: "Warehouse",
+          currentlyBelongModel: "Factory",
           history: [...ele.history, {
             createdAt: moment().utcOffset("+0700").format("YYYY-MM-DD HH:mm"),
             type: "import",
@@ -132,8 +132,9 @@ export class FactoryController {
     for (const ele of data) {
       await this.productService.update({ _id: ele._id }, {
         belongToWarehouse: importProductDto.warehouse,
-        currentlyBelong: importProductDto.warehouse,
-        currentlyBelongModel: "Warehouse",
+        currentlyBelong: factory._id,
+
+        currentlyBelongModel: "Factory",
         status: "in-stock",
         history: [...ele.history, {
           createdAt: moment().utcOffset("+0700").format("YYYY-MM-DD HH:mm"),
