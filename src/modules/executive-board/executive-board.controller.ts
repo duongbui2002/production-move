@@ -19,6 +19,9 @@ import { ProductStatisticDto } from "@common/dto/product-statistic.dto";
 import { PaginationParamsDto } from "@common/dto/pagination-params.dto";
 import { FilterQuery } from "mongoose";
 import { ProductDocument } from "@modules/product/schemas/product.schema";
+import { iif } from "rxjs";
+import { Model } from "@common/enums/common.enum";
+import { WarrantyService } from "@modules/warranty/warranty.service";
 
 @Controller("executive-board")
 export class ExecutiveBoardController {
@@ -27,6 +30,7 @@ export class ExecutiveBoardController {
               private readonly factoryService: FactoryService,
               private readonly distributionAgentService: DistributionAgentService,
               private readonly warrantyCenterService: WarrantyCenterService,
+              private readonly warrantyService: WarrantyService,
               private readonly productService: ProductService,
               private readonly customerService: CustomerService,
               private readonly mailService: MailService,
@@ -94,9 +98,34 @@ export class ExecutiveBoardController {
 
     let queryFilter: FilterQuery<ProductDocument> = {};
 
-
+    console.log(productStatisticDto);
     if (productStatisticDto.stakeholder) {
-      Object.assign(queryFilter, { currentlyBelong: productStatisticDto.stakeholder });
+
+      switch (productStatisticDto.stakeHolderModel) {
+
+        case Model.FACTORY:
+          Object.assign(queryFilter, { producedBy: productStatisticDto.stakeholder });
+          break;
+        case Model.DISTRIBUTION_AGENT:
+          Object.assign(queryFilter, { distributedBy: productStatisticDto.stakeholder });
+          break;
+        case Model.WARRANTY_CENTER:
+          const warrantyResults = await this.warrantyService.findAll({ warrantyCenter: productStatisticDto.stakeholder });
+
+          let warrantedProductIds = [];
+          for (const warrantyResult of warrantyResults.data) {
+            for (const product of warrantyResult.products) {
+              warrantedProductIds.push(product._id);
+            }
+          }
+
+          Object.assign(queryFilter, { _id: warrantedProductIds });
+          break;
+        default:
+          Object.assign(queryFilter, { currentlyBelong: productStatisticDto.stakeholder });
+          break;
+      }
+
     }
 
     if (productStatisticDto.month) {

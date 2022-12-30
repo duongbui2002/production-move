@@ -225,7 +225,7 @@ export class FactoryController {
     let aggregate = [];
 
     let queryFilter: FilterQuery<ProductDocument> = {
-      distributedBy: account.belongTo
+      producedBy: account.belongTo
     };
 
     if (productStatisticDto.month) {
@@ -283,9 +283,29 @@ export class FactoryController {
       },
       ...queryFilter
     }, { ...paginationParamsDto });
+    const satisfiedProductId: string[] = [];
+    for (const ele of data) {
+      satisfiedProductId.push(ele._id);
+    }
+
+    const results = await this.productService.aggregate([
+      { $match: { _id: { $in: satisfiedProductId } } }
+      , {
+        $group: {
+          _id: "$productLine",
+          total: { $sum: 1 }
+        }
+      }]);
+    for (const result of results) {
+      const productLine = await this.productLineService.findOne({ _id: result._id });
+      Object.assign(result, { productLine });
+      delete result._id;
+    }
     return {
       data,
+      totalProductEachProductLine: results,
       paginationOptions
+
     };
   }
 

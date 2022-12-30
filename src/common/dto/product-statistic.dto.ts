@@ -1,17 +1,17 @@
-import {IsNumber, IsOptional, IsString, Max, Min} from "class-validator";
-import {Type} from "class-transformer";
+import { IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
+import { Type } from "class-transformer";
 
 export class ProductStatisticDto {
   @IsOptional()
   @IsString()
-  status?: string
+  status?: string;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
   @Max(12)
-  month?: number
+  month?: number;
 
 
   @IsOptional()
@@ -19,19 +19,24 @@ export class ProductStatisticDto {
   @IsNumber()
   @Min(1)
   @Max(4)
-  quarter?: number
+  quarter?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  year?: number
+  year?: number;
 
   @IsOptional()
   @IsString()
-  productLineCode?: string
+  productLineCode?: string;
 
   @IsOptional()
   @IsString()
-  stakeholder?: string
+  stakeholder?: string;
+
+
+  @IsOptional()
+  @IsString()
+  stakeHolderModel?: string;
 }

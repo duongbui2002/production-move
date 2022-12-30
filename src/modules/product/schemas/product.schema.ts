@@ -31,7 +31,7 @@ export class Product {
     required: true,
     ref: "Factory"
   })
-  producedBy: FactoryDocument;
+    producedBy: FactoryDocument;
 
 
   @Prop({
